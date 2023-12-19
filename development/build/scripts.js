@@ -455,7 +455,7 @@ function createScriptTasks({
         buildTarget,
         buildType,
         browserPlatforms,
-        destFilepath: `${inpage}.js`,
+        destFilepath: `scripts/${inpage}.js`,
         entryFilepath: `./app/scripts/${inpage}.js`,
         label: inpage,
         ignoredFiles,
@@ -464,11 +464,25 @@ function createScriptTasks({
         version,
         applyLavaMoat,
       }),
+      () => {
+        // MV3 injects inpage into the tab's main world, but in MV2 we need
+        // to do it manually:
+        if (process.env.ENABLE_MV3) {
+          return;
+        }
+        // stringify inpage.js into itself, and then make it inject itself into the page
+        const inpagePath = path.join(__dirname, "../../", `dist/chrome/scripts/${inpage}.js`);
+        const textContent = JSON.stringify(readFileSync(inpagePath, "utf8"))
+          .replace(/\u2028/g, '\\u2028')
+          .replace(/\u2029/g, '\\u2029');
+        const html = `{let d=document,s=d.createElement('script');s.textContent=${textContent};d.documentElement.appendChild(s).remove();}`;
+        writeFileSync(inpagePath, html, "utf8");
+      },
       createNormalBundle({
         buildTarget,
         buildType,
         browserPlatforms,
-        destFilepath: `${contentscript}.js`,
+        destFilepath: `scripts/${contentscript}.js`,
         entryFilepath: `./app/scripts/${contentscript}.js`,
         label: contentscript,
         ignoredFiles,
@@ -1323,7 +1337,15 @@ function renderHtmlFile({
   const htmlFilePath = `./app/${htmlName}.html`;
   const htmlTemplate = readFileSync(htmlFilePath, 'utf8');
 
-  const htmlOutput = Sqrl.render(htmlTemplate, { isMMI, isTest });
+  const htmlOutput = Sqrl.render(htmlTemplate, { isMMI, isTest })
+    // these replacements are added to support the webpack build's automatic
+    // compilation of html files, which the gulp-based process doesn't support.
+    .replace("./scripts/load-background.ts", "./load-background.js")
+    .replace("<script src=\"./load-background.js\"></script>", "<script src=\"./load-background.js\"></script>\n    <script src=\"./chromereload.js\"></script>")
+    .replace("./scripts/load-ui.ts", "./load-app.js")
+    .replace("../ui/css/index.scss", "./index.css")
+    .replace("@lavamoat/snow/snow.prod.js", "./snow.js")
+    .replace("./scripts/use-snow.js", "./use-snow.js")
   browserPlatforms.forEach((platform) => {
     const dest = `./dist/${platform}/${htmlName}.html`;
     // we dont have a way of creating async events atm

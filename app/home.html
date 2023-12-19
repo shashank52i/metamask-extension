@@ -7,7 +7,10 @@
     {{@if(it.isMMI)}}
     <title>MetaMask Institutional</title>
     {{/if}}
-    <link rel="stylesheet" type="text/css" href="./index.css">
+    {{ @if (it.isSnowing) }}
+      <script src="@lavamoat/snow/snow.prod.js" defer></script>
+      <script src="./scripts/use-snow.js" defer></script>
+    {{/if}}
   </head>
   <body>
     <div id="app-content">
@@ -15,6 +18,6 @@
       <img class="loading-spinner" src="./images/spinner.gif" alt="" loading="lazy" />
     </div>
     <div id="popover-content"></div>
-    <script src="./load-app.js" type="text/javascript" charset="utf-8" async></script>
+    <script src="./scripts/load-ui.ts" async></script>
   </body>
 </html>
