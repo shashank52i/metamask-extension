@@ -38,6 +38,14 @@ const STORE_MOCK = {
       },
     },
     tokenList: {},
+    snaps: {
+      'npm:@test/test-snap': {
+        id: 'npm:@test/test-snap',
+        manifest: {
+          description: 'Test Snap',
+        },
+      },
+    },
   },
 };
 
