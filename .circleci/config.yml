@@ -3,18 +3,18 @@ version: 2.1
 executors:
   node-browsers:
     docker:
-      - image: cimg/node:18.18-browsers
+      - image: cimg/node:18.19-browsers
     environment:
       NODE_OPTIONS: --max_old_space_size=3072
   node-browsers-medium-plus:
     docker:
-      - image: cimg/node:18.18-browsers
+      - image: cimg/node:18.19-browsers
     resource_class: medium+
     environment:
       NODE_OPTIONS: --max_old_space_size=4096
   node-browsers-large:
     docker:
-      - image: cimg/node:18.18-browsers
+      - image: cimg/node:18.19-browsers
     resource_class: large
     environment:
       NODE_OPTIONS: --max_old_space_size=4096
@@ -26,10 +26,9 @@ executors:
       - image: mcr.microsoft.com/playwright:v1.39.0-jammy
 
 orbs:
-  gh: circleci/github-cli@2.0
-  codecov: codecov/codecov@3.2.2
+  gh: circleci/github-cli@2.3.0
+  codecov: codecov/codecov@3.3.0
   slack: circleci/slack@4.12.5
-
 
 rc_branch_only: &rc_branch_only
   filters:
@@ -473,6 +472,8 @@ jobs:
       - run:
           name: build:debug
           command: find dist/ -type f -exec md5sum {} \; | sort -k 2
+      - store_artifacts:
+          path: builds
       - persist_to_workspace:
           root: .
           paths:
@@ -690,6 +691,8 @@ jobs:
       - run:
           name: Move test zips to 'builds-test' to avoid conflict with production build
           command: mv ./builds ./builds-test
+      - store_artifacts:
+          path: builds-test
       - persist_to_workspace:
           root: .
           paths:
