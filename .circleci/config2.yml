@@ -3,30 +3,27 @@ version: 2.1
 executors:
   node-browsers:
     docker:
-      - image: cimg/node:20.11-browsers
+      - image: cimg/node:18.18-browsers
     environment:
-      FONTCONFIG_PATH: /etc/fonts
       NODE_OPTIONS: --max_old_space_size=3072
   node-browsers-medium-plus:
     docker:
-      - image: cimg/node:20.11-browsers
+      - image: cimg/node:18.18-browsers
     resource_class: medium+
     environment:
-      FONTCONFIG_PATH: /etc/fonts
       NODE_OPTIONS: --max_old_space_size=4096
   node-browsers-large:
     docker:
-      - image: cimg/node:20.11-browsers
+      - image: cimg/node:18.18-browsers
     resource_class: large
     environment:
-      FONTCONFIG_PATH: /etc/fonts
       NODE_OPTIONS: --max_old_space_size=4096
   shellcheck:
     docker:
       - image: koalaman/shellcheck-alpine@sha256:dfaf08fab58c158549d3be64fb101c626abc5f16f341b569092577ae207db199
   playwright:
     docker:
-      - image: mcr.microsoft.com/playwright:v1.41.1-jammy
+      - image: mcr.microsoft.com/playwright:v1.39.0-jammy
 
 orbs:
   gh: circleci/github-cli@2.0
@@ -50,34 +47,278 @@ aliases:
       set -u
       set -o pipefail
 
+      # This Shallow Git Clone code is adapted from what the standard CircleCI `checkout` command does for the case of an external PR (link to example below):
+      # https://app.circleci.com/pipelines/github/MetaMask/metamask-extension/49817/workflows/dc195ea6-ac06-4de1-9edf-4c949427b5fb/jobs/1430976/parallel-runs/0/steps/0-101
+      ### git clone --no-checkout "$CIRCLE_REPOSITORY_URL" .
+      ### git fetch --force origin +refs/pull/18748/head:refs/remotes/origin/pull/18748
+      ### git checkout --force -B "$CIRCLE_BRANCH" "$CIRCLE_SHA1"
+      ### git --no-pager log --no-color -n 1 --format='HEAD is now at %h %s'
+
       # Set up SSH access
       # This SSH key is the current github.com SSH key as of June 2023, but it will need to be changed whenever github changes their key (probably every few years)
       GITHUB_SSH_KEY="AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl"
       mkdir -p ~/.ssh
       echo github.com ssh-ed25519 $GITHUB_SSH_KEY >> ~/.ssh/known_hosts
 
-      git clone --depth 1 --no-checkout "$CIRCLE_REPOSITORY_URL" .
-      git fetch --depth 1 origin "$CIRCLE_SHA1"
-
+      # Take a different clone path depending on if it's a tag, a PR from an external repo, or the normal case
       if [ -n "${CIRCLE_TAG-}" ]; then
-        echo "Checkout tag '${CIRCLE_TAG}' at commit '${CIRCLE_SHA1}'"
-        git checkout "$CIRCLE_TAG"
-        git reset --hard "$CIRCLE_SHA1"
+        # tag
+        git clone --depth 1 --no-checkout "$CIRCLE_REPOSITORY_URL" .
+        git fetch --depth 1 --force origin "+refs/tags/${CIRCLE_TAG}:refs/tags/${CIRCLE_TAG}"
+        git checkout --force -q "$CIRCLE_TAG" "$CIRCLE_SHA1"
+      elif [[ "$CIRCLE_BRANCH" =~ ^pull\/* ]]; then
+        # pull request
+        git clone --depth 1 --no-checkout "$CIRCLE_REPOSITORY_URL" .
+        git fetch --depth 1 --force origin "${CIRCLE_BRANCH}/head:remotes/origin/${CIRCLE_BRANCH}"
+        git checkout --force -B "$CIRCLE_BRANCH" "$CIRCLE_SHA1"
       else
-        echo "Checkout branch '${CIRCLE_BRANCH}' at commit '${CIRCLE_SHA1}'"
-        git checkout -B "$CIRCLE_BRANCH" "$CIRCLE_SHA1"
+        # normal case
+        git clone --depth 1 "$CIRCLE_REPOSITORY_URL" --branch "$CIRCLE_BRANCH" .
       fi
 
 workflows:
-  test_swap:
+  test_and_release:
     jobs:
-      - prep-deps
-      - prep-build-test-swap-playwright:
+      - create_release_pull_request:
+          <<: *rc_branch_only
           requires:
             - prep-deps
-      - test-e2e-swap-playwright - OPTIONAL:
+      - trigger-beta-build:
           requires:
-            - prep-build-test-mswapmi-playwright
+            - prep-deps
+      - prep-deps
+      - test-deps-audit:
+          requires:
+            - prep-deps
+      - test-deps-depcheck:
+          requires:
+            - prep-deps
+      - test-yarn-dedupe:
+          requires:
+            - prep-deps
+      - validate-lavamoat-allow-scripts:
+          requires:
+            - prep-deps
+      - validate-lavamoat-policy-build:
+          requires:
+            - prep-deps
+      - validate-lavamoat-policy-webapp:
+          matrix:
+            parameters:
+              build-type: [main, beta, flask, mmi, desktop]
+          requires:
+            - prep-deps
+      - prep-build-mmi:
+          requires:
+            - prep-deps
+      - prep-build:
+          requires:
+            - prep-deps
+      - prep-build-desktop:
+          filters:
+            branches:
+              ignore: master
+          requires:
+            - prep-deps
+      - prep-build-flask:
+          requires:
+            - prep-deps
+      - prep-build-test:
+          requires:
+            - prep-deps
+      - prep-build-multichain-test:
+          requires:
+            - prep-deps
+      - prep-build-test-mv3:
+          requires:
+            - prep-deps
+      - prep-build-test-flask:
+          requires:
+            - prep-deps
+      - prep-build-test-mmi:
+          requires:
+            - prep-deps
+      - prep-build-test-mmi-playwright:
+          requires:
+            - prep-deps
+      - prep-build-storybook:
+          requires:
+            - prep-deps
+      - prep-build-ts-migration-dashboard:
+          requires:
+            - prep-deps
+      - test-lint:
+          requires:
+            - prep-deps
+      - test-lint-shellcheck
+      - test-lint-lockfile:
+          requires:
+            - prep-deps
+      - test-lint-changelog:
+          requires:
+            - prep-deps
+      - test-e2e-chrome:
+          requires:
+            - prep-build-test
+      - test-e2e-chrome-multichain:
+          requires:
+            - prep-build-multichain-test
+      - test-e2e-firefox:
+          requires:
+            - prep-build-test
+      - test-e2e-chrome-rpc:
+          requires:
+            - prep-build-test
+      - test-e2e-chrome-flask:
+          requires:
+            - prep-build-test-flask
+      - test-e2e-firefox-flask:
+          requires:
+            - prep-build-test-flask
+      - test-e2e-chrome-mmi:
+          requires:
+            - prep-build-test-mmi
+      - test-e2e-mmi-playwright - OPTIONAL:
+          requires:
+            - prep-build-test-mmi-playwright
+      - test-e2e-chrome-rpc-mmi:
+          requires:
+            - prep-build-test-mmi
+      - test-e2e-chrome-mv3:
+          requires:
+            - prep-build-test-mv3
+      - test-unit-mocha:
+          requires:
+            - prep-deps
+      - test-unit-jest-main:
+          requires:
+            - prep-deps
+      - test-unit-jest-development:
+          requires:
+            - prep-deps
+      - upload-and-validate-coverage:
+          requires:
+            - test-unit-jest-main
+            - test-unit-jest-development
+            - test-unit-mocha
+      - test-unit-global:
+          requires:
+            - prep-deps
+      - test-storybook:
+          requires:
+            - prep-deps
+            - prep-build-storybook
+      - validate-source-maps:
+          requires:
+            - prep-build
+      - validate-source-maps-beta:
+          requires:
+            - trigger-beta-build
+      - validate-source-maps-desktop:
+          filters:
+            branches:
+              ignore: master
+          requires:
+            - prep-build-desktop
+      - validate-source-maps-mmi:
+          requires:
+            - prep-build-mmi
+      - validate-source-maps-flask:
+          requires:
+            - prep-build-flask
+      - test-mozilla-lint:
+          requires:
+            - prep-deps
+            - prep-build
+      - test-mozilla-lint-desktop:
+          filters:
+            branches:
+              ignore: master
+          requires:
+            - prep-deps
+            - prep-build-desktop
+      - test-mozilla-lint-flask:
+          requires:
+            - prep-deps
+            - prep-build-flask
+      - all-tests-pass:
+          requires:
+            - test-deps-depcheck
+            - validate-lavamoat-allow-scripts
+            - validate-lavamoat-policy-build
+            - validate-lavamoat-policy-webapp
+            - test-lint
+            - test-lint-shellcheck
+            - test-lint-lockfile
+            - test-lint-changelog
+            - test-unit-jest-main
+            - test-unit-jest-development
+            - test-unit-global
+            - test-unit-mocha
+            - upload-and-validate-coverage
+            - validate-source-maps
+            - validate-source-maps-beta
+            - validate-source-maps-desktop
+            - validate-source-maps-flask
+            - validate-source-maps-mmi
+            - test-mozilla-lint
+            - test-mozilla-lint-desktop
+            - test-mozilla-lint-flask
+            - test-e2e-chrome
+            - test-e2e-chrome-multichain
+            - test-e2e-firefox
+            - test-e2e-chrome-flask
+            - test-e2e-firefox-flask
+            - test-e2e-chrome-mmi
+            - test-e2e-chrome-rpc-mmi
+            - test-storybook
+      - benchmark:
+          requires:
+            - prep-build-test
+      - user-actions-benchmark:
+          requires:
+            - prep-build-test
+      - stats-module-load-init:
+          requires:
+            - prep-build-test-mv3
+      - job-publish-prerelease:
+          requires:
+            - prep-deps
+            - prep-build
+            - trigger-beta-build
+            - prep-build-desktop
+            - prep-build-mmi
+            - prep-build-flask
+            - prep-build-storybook
+            - prep-build-ts-migration-dashboard
+            - prep-build-test-mv3
+            - benchmark
+            - user-actions-benchmark
+            - stats-module-load-init
+            - all-tests-pass
+      - job-publish-release:
+          filters:
+            branches:
+              only: master
+          requires:
+            - prep-deps
+            - prep-build
+            - prep-build-desktop
+            - prep-build-mmi
+            - prep-build-flask
+            - all-tests-pass
+      - job-publish-storybook:
+          filters:
+            branches:
+              only: develop
+          requires:
+            - prep-build-storybook
+      - job-publish-ts-migration-dashboard:
+          filters:
+            branches:
+              only: develop
+          requires:
+            - prep-build-ts-migration-dashboard
 
 jobs:
   trigger-beta-build:
@@ -413,30 +654,6 @@ jobs:
           path: builds-test-mmi-playwright
           destination: builds-test-mmi-playwright
 
-  prep-build-test-swap-playwright:
-    executor: node-browsers-medium-plus
-    steps:
-      - run: *shallow-git-clone
-      - attach_workspace:
-          at: .
-      - run:
-          name: Build extension for Playwright e2e
-          command: yarn dist
-      - run:
-          name: Move test build to 'dist-test' to avoid conflict with production build
-          command: mv ./dist ./dist-test-swap-playwright
-      - run:
-          name: Move test zips to 'builds-test' to avoid conflict with production build
-          command: mv ./builds ./builds-test-swap-playwright
-      - persist_to_workspace:
-          root: .
-          paths:
-            - dist-test-swap-playwright
-            - builds-test-swap-playwright
-      - store_artifacts:
-          path: builds-test-swap-playwright
-          destination: builds-test-swap-playwright
-
   prep-build-test-mv3:
     executor: node-browsers-medium-plus
     steps:
@@ -650,7 +867,7 @@ jobs:
           command: |
             if .circleci/scripts/test-run-e2e.sh
             then
-              timeout 20m yarn test:e2e:chrome --retries 2 --debug
+              yarn test:e2e:chrome --retries 2 --debug
             fi
           no_output_timeout: 5m
       - store_artifacts:
@@ -677,11 +894,9 @@ jobs:
           command: |
             if .circleci/scripts/test-run-e2e.sh
             then
-              timeout 20m yarn test:e2e:chrome --retries 2 --debug
+              MULTICHAIN=1 yarn test:e2e:chrome --retries 2 --debug
             fi
           no_output_timeout: 5m
-          environment:
-            MULTICHAIN: 1
       - store_artifacts:
           path: test-artifacts
           destination: test-artifacts
@@ -706,7 +921,7 @@ jobs:
           command: |
             if .circleci/scripts/test-run-e2e.sh
             then
-              timeout 20m yarn test:e2e:chrome --retries 2 --debug || echo "Temporarily suppressing MV3 e2e test failures"
+              yarn test:e2e:chrome --retries 2 --debug || echo "Temporarily suppressing MV3 e2e test failures"
             fi
           no_output_timeout: 5m
       - store_artifacts:
@@ -731,34 +946,7 @@ jobs:
           command: |
             if .circleci/scripts/test-run-e2e.sh
             then
-              timeout 20m yarn test:e2e:chrome:rpc --retries 2
-            fi
-          no_output_timeout: 5m
-      - store_artifacts:
-          path: test-artifacts
-          destination: test-artifacts
-      - store_test_results:
-          path: test/test-results/e2e
-
-  test-e2e-chrome-multiple-providers:
-    executor: node-browsers
-    parallelism: 1
-    steps:
-      - run: *shallow-git-clone
-      - attach_workspace:
-          at: .
-      - run:
-          name: Move test build to dist
-          command: mv ./dist-test ./dist
-      - run:
-          name: Move test zips to builds
-          command: mv ./builds-test ./builds
-      - run:
-          name: test:e2e:chrome:multi-provider
-          command: |
-            if .circleci/scripts/test-run-e2e.sh
-            then
-              yarn test:e2e:chrome:multi-provider --retries 2
+              yarn test:e2e:chrome:rpc --retries 2
             fi
           no_output_timeout: 5m
       - store_artifacts:
@@ -784,7 +972,7 @@ jobs:
           command: |
             if .circleci/scripts/test-run-e2e.sh
             then
-              timeout 20m yarn test:e2e:chrome:rpc --retries 2 --debug --build-type=mmi
+              yarn test:e2e:chrome:rpc --retries 2 --debug --build-type=mmi
             fi
           no_output_timeout: 5m
       - store_artifacts:
@@ -792,21 +980,6 @@ jobs:
           destination: test-artifacts
       - store_test_results:
           path: test/test-results/e2e
-
-  test-e2e-chrome-vault-decryption:
-    executor: node-browsers-large
-    steps:
-      - run: *shallow-git-clone
-      - attach_workspace:
-          at: .
-      - run:
-          name: test:e2e:chrome:vault
-          command: |
-            if .circleci/scripts/test-run-e2e.sh
-            then
-              yarn test:e2e:single test/e2e/vault-decryption-chrome.spec.js --browser chrome --retries 2 --debug
-            fi
-          no_output_timeout: 5m
 
   test-e2e-firefox-flask:
     executor: node-browsers-large
@@ -826,7 +999,7 @@ jobs:
           command: |
             if .circleci/scripts/test-run-e2e.sh
             then
-              timeout 20m yarn test:e2e:firefox:flask --retries 2 --debug
+              yarn test:e2e:firefox:flask --retries 2 --debug
             fi
           no_output_timeout: 5m
       - store_artifacts:
@@ -853,7 +1026,7 @@ jobs:
           command: |
             if .circleci/scripts/test-run-e2e.sh
             then
-              timeout 20m yarn test:e2e:chrome:flask --retries 2 --debug
+              yarn test:e2e:chrome:flask --retries 2 --debug
             fi
           no_output_timeout: 5m
       - store_artifacts:
@@ -880,7 +1053,7 @@ jobs:
           command: |
             if .circleci/scripts/test-run-e2e.sh
             then
-              timeout 20m yarn test:e2e:chrome:mmi --retries 2 --debug --build-type=mmi
+              yarn test:e2e:chrome:mmi --retries 2 --debug --build-type=mmi
             fi
           no_output_timeout: 5m
       - store_artifacts:
@@ -908,7 +1081,7 @@ jobs:
           command: |
             TESTFILES=$(circleci tests glob "test/e2e/mmi/**/*.spec.ts")
             echo "$TESTFILES"
-            echo "$TESTFILES" | timeout 20m circleci tests run --command="xvfb-run xargs yarn playwright test" verbose --split-by=timings
+            echo "$TESTFILES" | circleci tests run --command="xvfb-run xargs yarn playwright test" verbose --split-by=timings
           no_output_timeout: 10m
       - slack/notify:
           branch_pattern: Version-v*
@@ -925,34 +1098,6 @@ jobs:
       - store_artifacts:
           name: html-report and artifacts
           path: public/playwright/playwright-reports
-      - store_test_results:
-          name: report for pipeline integration
-          path: public/playwright/playwright-reports/junit/test-results.xml
-
-  test-e2e-swap-playwright - OPTIONAL:
-    executor: playwright
-    parallelism: 1
-    steps:
-      - run: *shallow-git-clone
-      - attach_workspace:
-          at: .
-      - run:
-          name: Move test build to dist
-          command: mv ./dist-test-swap-playwright ./dist
-      - run:
-          name: Install chromium
-          command: |
-            yarn playwright install chromium
-      - run:
-          name: test:e2e:chrome:swap
-          command: |
-            TESTFILES=$(circleci tests glob "test/e2e/swap/**/*.spec.ts")
-            echo "$TESTFILES"
-            echo "$TESTFILES" | circleci tests run --command="xvfb-run xargs yarn playwright test --project=swap" verbose --split-by=timings
-          no_output_timeout: 10m
-      - store_artifacts:
-          name: html-report and artifacts
-          path: public/playwright/playwright-reports/swap
       - store_test_results:
           name: report for pipeline integration
           path: public/playwright/playwright-reports/junit/test-results.xml
@@ -975,7 +1120,7 @@ jobs:
           command: |
             if .circleci/scripts/test-run-e2e.sh
             then
-              timeout 20m yarn test:e2e:firefox --retries 2 --debug
+              yarn test:e2e:firefox --retries 2 --debug
             fi
           no_output_timeout: 5m
       - store_artifacts:
