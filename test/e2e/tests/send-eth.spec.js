@@ -23,10 +23,6 @@ describe('Send ETH', function () {
           title: this.test.fullTitle(),
         },
         async ({ driver, ganacheServer }) => {
-          if (process.env.MULTICHAIN) {
-            return;
-          }
-
           await logInWithBalanceValidation(driver, ganacheServer);
 
           await openActionMenuAndStartSendFlow(driver);
@@ -36,11 +32,13 @@ describe('Send ETH', function () {
             '0x2f318C334780961FB129D2a6c30D0763d9a5C970',
           );
 
-          const inputAmount = await driver.findElement('.unit-input__input');
+          const inputAmount = await driver.findElement(
+            'input[placeholder="0"]',
+          );
           await inputAmount.fill('1000');
 
           await driver.findElement({
-            css: '.send-v2__error-amount',
+            css: '[data-testid="send-page-amount-error"]',
             text: 'Insufficient funds for gas',
           });
 
@@ -51,7 +49,7 @@ describe('Send ETH', function () {
           await driver.assertElementNotPresent('.send-v2__error-amount');
 
           const amountMax = await driver.findClickableElement(
-            '.send-v2__amount-max',
+            '[data-testid="max-clear-button"]',
           );
           await amountMax.click();
 
@@ -69,7 +67,7 @@ describe('Send ETH', function () {
           assert.equal(inputValue, '1');
 
           // Continue to next screen
-          await driver.clickElement({ text: 'Next', tag: 'button' });
+          await driver.clickElement({ text: 'Continue', tag: 'button' });
 
           await driver.clickElement({ text: 'Confirm', tag: 'button' });
 
@@ -104,22 +102,21 @@ describe('Send ETH', function () {
           await driver.delay(1000);
 
           await openActionMenuAndStartSendFlow(driver);
-          if (process.env.MULTICHAIN) {
-            return;
-          }
           await driver.fill(
             'input[placeholder="Enter public address (0x) or ENS name"]',
             '0x2f318C334780961FB129D2a6c30D0763d9a5C970',
           );
 
-          const inputAmount = await driver.findElement('.unit-input__input');
+          const inputAmount = await driver.findElement(
+            'input[placeholder="0"]',
+          );
           await inputAmount.fill('1');
 
           const inputValue = await inputAmount.getProperty('value');
           assert.equal(inputValue, '1');
 
           // Continue to next screen
-          await driver.clickElement({ text: 'Next', tag: 'button' });
+          await driver.clickElement({ text: 'Continue', tag: 'button' });
 
           await driver.delay(1000);
           const transactionAmounts = await driver.findElements(
@@ -172,11 +169,13 @@ describe('Send ETH', function () {
             contractAddress,
           );
 
-          const inputAmount = await driver.findElement('.unit-input__input');
+          const inputAmount = await driver.findElement(
+            'input[placeholder="0"]',
+          );
           await inputAmount.fill('1');
 
           // Continue to next screen
-          await driver.clickElement({ text: 'Next', tag: 'button' });
+          await driver.clickElement({ text: 'Continue', tag: 'button' });
           await driver.clickElement({ text: 'Confirm', tag: 'button' });
 
           // Go back to home screen to check txn
@@ -406,9 +405,7 @@ describe('Send ETH', function () {
             await logInWithBalanceValidation(driver, ganacheServer);
 
             await openActionMenuAndStartSendFlow(driver);
-            if (process.env.MULTICHAIN) {
-              return;
-            }
+
             await driver.fill(
               'input[placeholder="Enter public address (0x) or ENS name"]',
               '0xc427D562164062a23a5cFf596A4a3208e72Acd28',
@@ -419,8 +416,11 @@ describe('Send ETH', function () {
               '0xa9059cbb0000000000000000000000002f318C334780961FB129D2a6c30D0763d9a5C970000000000000000000000000000000000000000000000000000000000000000a',
             );
 
-            await driver.findClickableElement({ text: 'Next', tag: 'button' });
-            await driver.clickElement({ text: 'Next', tag: 'button' });
+            await driver.findClickableElement({
+              text: 'Continue',
+              tag: 'button',
+            });
+            await driver.clickElement({ text: 'Continue', tag: 'button' });
 
             await driver.findClickableElement(
               '[data-testid="sender-to-recipient__name"]',
