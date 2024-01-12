@@ -76,7 +76,15 @@ async function buildScssPipeline(src, dest, devMode, rtl) {
       // pre-process
       gulp.src(src),
       devMode && sourcemaps.init(),
-      sass().on('error', sass.logError),
+      sass({
+        // The order of includePaths is important; prefer our own
+        // folders over `node_modules`
+        includePaths: [
+          // enables shortcuts to `@use design-system`, `@use utilities`, etc.
+          './ui/css',
+          './node_modules',
+        ],
+      }).on('error', sass.logError),
       autoprefixer(),
       rtl && rtlcss(),
       rtl && rename({ suffix: '-rtl' }),
