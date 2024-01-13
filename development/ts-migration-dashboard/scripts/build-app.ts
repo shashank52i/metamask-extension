@@ -9,7 +9,7 @@ import endOfStream from 'end-of-stream';
 import pump from 'pump';
 import gulp from 'gulp';
 import gulpSass from 'gulp-sass';
-import sass from 'sass';
+import sass from 'sass-embedded';
 import sourcemaps from 'gulp-sourcemaps';
 import autoprefixer from 'gulp-autoprefixer';
 import fg from 'fast-glob';

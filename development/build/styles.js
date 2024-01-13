@@ -69,7 +69,7 @@ async function buildScssPipeline(src, dest, devMode, rtl) {
     // use our own compiler which runs sass in its own process
     // in order to not pollute the intrinsics
     // eslint-disable-next-line node/global-require
-    sass = require('gulp-sass')(require('./sass-compiler'));
+    sass = require('gulp-sass')(require('sass-embedded'));
   }
   await pump(
     ...[

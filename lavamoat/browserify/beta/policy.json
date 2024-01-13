@@ -37,7 +37,7 @@
     "@ensdomains/content-hash>cids>multicodec": {
       "packages": {
         "@ensdomains/content-hash>cids>uint8arrays": true,
-        "@ensdomains/content-hash>multicodec>varint": true
+        "sass-embedded>varint": true
       }
     },
     "@ensdomains/content-hash>cids>multihashes": {
@@ -72,7 +72,7 @@
     "@ensdomains/content-hash>multicodec": {
       "packages": {
         "@ensdomains/content-hash>multicodec>uint8arrays": true,
-        "@ensdomains/content-hash>multicodec>varint": true
+        "sass-embedded>varint": true
       }
     },
     "@ensdomains/content-hash>multicodec>uint8arrays": {
