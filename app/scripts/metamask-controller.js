@@ -304,6 +304,7 @@ export const METAMASK_CONTROLLER_EVENTS = {
   UPDATE_BADGE: 'updateBadge',
   // TODO: Add this and similar enums to the `controllers` repo and export them
   APPROVAL_STATE_CHANGE: 'ApprovalController:stateChange',
+  QUEUED_REQUEST_STATE_CHANGE: 'QueuedRequestController:stateChange',
 };
 
 // stream channels
@@ -4652,7 +4653,9 @@ export default class MetamaskController extends EventEmitter {
     }
 
     const requestQueueMiddleware = createQueuedRequestMiddleware({
-      messenger: this.controllerMessenger,
+      enqueueRequest: this.queuedRequestController.enqueueRequest.bind(
+        this.queuedRequestController,
+      ),
       useRequestQueue: this.preferencesController.getUseRequestQueue.bind(
         this.preferencesController,
       ),
