@@ -41,6 +41,8 @@ const getBlockaidMetricUiCustomization = (resultType) => {
     uiCustomization = [MetaMetricsEventUiCustomization.FlaggedAsMalicious];
   } else if (resultType === BlockaidResultType.Warning) {
     uiCustomization = [MetaMetricsEventUiCustomization.FlaggedAsWarning];
+  } else if (resultType === BlockaidResultType.Errored) {
+    uiCustomization = [MetaMetricsEventUiCustomization.SecurityAlertError];
   }
 
   return uiCustomization;

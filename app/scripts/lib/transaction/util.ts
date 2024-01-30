@@ -13,6 +13,7 @@ import { PPOMController } from '@metamask/ppom-validator';
 import { captureException } from '@sentry/browser';
 import { addHexPrefix } from 'ethereumjs-util';
 import { SUPPORTED_CHAIN_IDS } from '../ppom/ppom-middleware';
+import { BlockaidResultType } from '../../../../shared/constants/security-provider';
 ///: END:ONLY_INCLUDE_IF
 
 export type AddTransactionOptions = NonNullable<
@@ -111,7 +112,16 @@ export async function addTransaction(
 
       const securityAlertResponse = await ppomController.usePPOM(
         async (ppom) => {
-          return ppom.validateJsonRpc(ppomRequest);
+          try {
+            return ppom.validateJsonRpc(ppomRequest);
+          } catch (error) {
+            // send to sentry
+            captureException(error);
+            return {
+              reason: error,
+              result_type: BlockaidResultType.Errored,
+            };
+          }
         },
       );
 

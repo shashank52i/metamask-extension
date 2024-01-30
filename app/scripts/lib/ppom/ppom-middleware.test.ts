@@ -3,6 +3,7 @@ import {
   BlockaidReason,
   BlockaidResultType,
 } from '../../../../shared/constants/security-provider';
+import { SecurityAlertResponse } from '../transaction/util';
 import { createPPOMMiddleware } from './ppom-middleware';
 
 Object.defineProperty(globalThis, 'fetch', {
@@ -103,6 +104,33 @@ describe('PPOMMiddleware', () => {
     expect((req.securityAlertResponse as any)?.reason).toBe(
       BlockaidReason.failed,
     );
+  });
+
+  it('sets Error type in response if validateJsonRpc throw error', async () => {
+    const ppom = {
+      validateJsonRpc: () => {
+        throw new Error('some error');
+      },
+    };
+
+    const usePPOM = async (callback: any) => {
+      return callback(ppom);
+    };
+
+    const middlewareFunction = createMiddleWare(usePPOM);
+    const req = {
+      method: 'eth_sendTransaction',
+      securityAlertResponse: undefined,
+    };
+    await middlewareFunction(req, undefined, () => undefined);
+    expect(req.securityAlertResponse).toBeDefined();
+    expect(
+      (req.securityAlertResponse as unknown as SecurityAlertResponse).reason,
+    ).toStrictEqual('Error: some error');
+    expect(
+      (req.securityAlertResponse as unknown as SecurityAlertResponse)
+        .result_type,
+    ).toStrictEqual(BlockaidResultType.Errored);
   });
 
   it('should call next method when ppomController.usePPOM completes', async () => {

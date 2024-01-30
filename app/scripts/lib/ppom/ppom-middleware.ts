@@ -2,6 +2,7 @@ import { PPOM } from '@blockaid/ppom_release';
 import { PPOMController } from '@metamask/ppom-validator';
 import { NetworkController } from '@metamask/network-controller';
 
+import { captureException } from '@sentry/browser';
 import {
   BlockaidReason,
   BlockaidResultType,
@@ -64,7 +65,17 @@ export function createPPOMMiddleware(
         // eslint-disable-next-line require-atomic-updates
         req.securityAlertResponse = await ppomController.usePPOM(
           async (ppom: PPOM) => {
-            return ppom.validateJsonRpc(req);
+            try {
+              return ppom.validateJsonRpc(req);
+            } catch (error) {
+              // send to sentry
+              captureException(error);
+              const errorObject = error as unknown as Error;
+              return {
+                reason: `${errorObject.name}: ${errorObject.message}`,
+                result_type: BlockaidResultType.Errored,
+              };
+            }
           },
         );
       }
