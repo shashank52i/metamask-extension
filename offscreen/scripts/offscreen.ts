@@ -1,4 +1,5 @@
 import { BrowserRuntimePostMessageStream } from '@metamask/post-message-stream';
+import { ProxySnapExecutor } from '@metamask/snaps-execution-environments/dist/cjs/proxy/ProxySnapExecutor';
 
 /**
  * Initialize a post message stream with the parent window that is initialized
@@ -17,3 +18,5 @@ const parentStream = new BrowserRuntimePostMessageStream({
 parentStream.on('data', (data) => {
   console.log('Offscreen Document received data from service worker', data);
 });
+
+ProxySnapExecutor.initialize(parentStream);

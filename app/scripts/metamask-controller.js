@@ -83,6 +83,7 @@ import {
   IframeExecutionService,
   buildSnapEndowmentSpecifications,
   buildSnapRestrictedMethodSpecifications,
+  OffscreenExecutionService,
 } from '@metamask/snaps-controllers';
 import { createSnapsMethodMiddleware } from '@metamask/snaps-rpc-methods';
 ///: END:ONLY_INCLUDE_IF
@@ -1135,17 +1136,30 @@ export default class MetamaskController extends EventEmitter {
     });
 
     ///: BEGIN:ONLY_INCLUDE_IF(snaps)
+    const shouldUseOffscreenExecutionService =
+      isManifestV3 &&
+      typeof chrome !== 'undefined' &&
+      // eslint-disable-next-line no-undef
+      typeof chrome.offscreen !== 'undefined';
+
     const snapExecutionServiceArgs = {
-      iframeUrl: new URL(process.env.IFRAME_EXECUTION_ENVIRONMENT_URL),
+      [shouldUseOffscreenExecutionService ? 'frameUrl' : 'iframeUrl']: new URL(
+        process.env.IFRAME_EXECUTION_ENVIRONMENT_URL,
+      ),
       messenger: this.controllerMessenger.getRestricted({
         name: 'ExecutionService',
       }),
       setupSnapProvider: this.setupSnapProvider.bind(this),
     };
 
-    this.snapExecutionService = new IframeExecutionService(
-      snapExecutionServiceArgs,
-    );
+    this.snapExecutionService =
+      shouldUseOffscreenExecutionService === false
+        ? new IframeExecutionService(snapExecutionServiceArgs)
+        : new OffscreenExecutionService({
+            // eslint-disable-next-line no-undef
+            documentUrl: chrome.runtime.getURL('./offscreen.html'),
+            ...snapExecutionServiceArgs,
+          });
 
     const snapControllerMessenger = this.controllerMessenger.getRestricted({
       name: 'SnapController',
