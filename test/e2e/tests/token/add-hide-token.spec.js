@@ -5,8 +5,8 @@ const {
   withFixtures,
   unlockWallet,
   WINDOW_TITLES,
-} = require('../helpers');
-const FixtureBuilder = require('../fixture-builder');
+} = require('../../helpers');
+const FixtureBuilder = require('../../fixture-builder');
 
 describe('Add hide token', function () {
   it('hides the token when clicked', async function () {

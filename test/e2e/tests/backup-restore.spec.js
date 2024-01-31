@@ -42,8 +42,9 @@ const getBackupJson = async () => {
 const restoreFile = path.join(
   __dirname,
   '..',
-  'restore',
-  'MetaMaskUserData.json',
+  '..',
+  'data',
+  'metamask-user-data.json',
 );
 
 describe('Backup and Restore', function () {

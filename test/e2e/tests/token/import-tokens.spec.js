@@ -3,8 +3,8 @@ const {
   defaultGanacheOptions,
   withFixtures,
   unlockWallet,
-} = require('../helpers');
-const FixtureBuilder = require('../fixture-builder');
+} = require('../../helpers');
+const FixtureBuilder = require('../../fixture-builder');
 
 describe('Import flow', function () {
   async function mockPriceFetch(mockServer) {

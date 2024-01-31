@@ -7,8 +7,8 @@ const {
   WINDOW_TITLES,
   DAPP_URL,
   unlockWallet,
-} = require('../helpers');
-const FixtureBuilder = require('../fixture-builder');
+} = require('../../helpers');
+const FixtureBuilder = require('../../fixture-builder');
 
 describe('Multiple ERC20 Watch Asset', function () {
   // TODO: This assertion will change once the method is fixed.

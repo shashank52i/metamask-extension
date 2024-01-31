@@ -1,12 +1,12 @@
 const { strict: assert } = require('assert');
-const FixtureBuilder = require('../fixture-builder');
+const FixtureBuilder = require('../../fixture-builder');
 
 const {
   defaultGanacheOptions,
   unlockWallet,
   withFixtures,
   getEventPayloads,
-} = require('../helpers');
+} = require('../../helpers');
 
 async function mockServerCalls(mockServer) {
   return [

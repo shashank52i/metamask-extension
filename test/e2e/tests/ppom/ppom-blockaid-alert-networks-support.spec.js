@@ -1,13 +1,13 @@
 const { strict: assert } = require('assert');
-const FixtureBuilder = require('../fixture-builder');
-const { mockServerJsonRpc } = require('../mock-server-json-rpc');
+const FixtureBuilder = require('../../fixture-builder');
+const { mockServerJsonRpc } = require('../../mock-server-json-rpc');
 const {
   WINDOW_TITLES,
   defaultGanacheOptions,
   openDapp,
   unlockWallet,
   withFixtures,
-} = require('../helpers');
+} = require('../../helpers');
 
 async function mockInfura(mockServer) {
   await mockServerJsonRpc(mockServer, [

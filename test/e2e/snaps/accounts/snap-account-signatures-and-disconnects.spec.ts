@@ -1,7 +1,7 @@
 import { Suite } from 'mocha';
-import FixtureBuilder from '../fixture-builder';
-import { withFixtures, multipleGanacheOptions } from '../helpers';
-import { Driver } from '../webdriver/driver';
+import FixtureBuilder from '../../fixture-builder';
+import { withFixtures, multipleGanacheOptions } from '../../helpers';
+import { Driver } from '../../webdriver/driver';
 import {
   installSnapSimpleKeyring,
   makeNewAccountAndSwitch,

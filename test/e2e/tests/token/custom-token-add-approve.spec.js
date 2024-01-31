@@ -7,9 +7,9 @@ const {
   unlockWallet,
   editGasfeeForm,
   WINDOW_TITLES,
-} = require('../helpers');
-const FixtureBuilder = require('../fixture-builder');
-const { SMART_CONTRACTS } = require('../seeder/smart-contracts');
+} = require('../../helpers');
+const FixtureBuilder = require('../../fixture-builder');
+const { SMART_CONTRACTS } = require('../../seeder/smart-contracts');
 
 describe('Create token, approve token and approve token without gas', function () {
   const smartContract = SMART_CONTRACTS.HST;

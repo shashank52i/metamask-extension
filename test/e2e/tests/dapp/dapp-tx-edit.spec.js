@@ -5,9 +5,9 @@ const {
   openDapp,
   unlockWallet,
   WINDOW_TITLES,
-} = require('../helpers');
-const { SMART_CONTRACTS } = require('../seeder/smart-contracts');
-const FixtureBuilder = require('../fixture-builder');
+} = require('../../helpers');
+const { SMART_CONTRACTS } = require('../../seeder/smart-contracts');
+const FixtureBuilder = require('../../fixture-builder');
 
 describe('Editing confirmations of dapp initiated contract interactions', function () {
   const smartContract = SMART_CONTRACTS.PIGGYBANK;

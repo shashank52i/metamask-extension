@@ -1,5 +1,5 @@
 import { privateToAddress } from 'ethereumjs-util';
-import FixtureBuilder from '../fixture-builder';
+import FixtureBuilder from '../../fixture-builder';
 import {
   PRIVATE_KEY,
   PRIVATE_KEY_TWO,
@@ -10,9 +10,9 @@ import {
   validateContractDetails,
   multipleGanacheOptions,
   regularDelayMs,
-} from '../helpers';
-import { Driver } from '../webdriver/driver';
-import { TEST_SNAPS_SIMPLE_KEYRING_WEBSITE_URL } from '../../../ui/helpers/constants/common';
+} from '../../helpers';
+import { Driver } from '../../webdriver/driver';
+import { TEST_SNAPS_SIMPLE_KEYRING_WEBSITE_URL } from '../../../../ui/helpers/constants/common';
 
 /**
  * These are fixtures specific to Account Snap E2E tests:

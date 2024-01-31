@@ -8,8 +8,8 @@ const {
   unlockWallet,
   WINDOW_TITLES,
   generateGanacheOptions,
-} = require('../helpers');
-const FixtureBuilder = require('../fixture-builder');
+} = require('../../helpers');
+const FixtureBuilder = require('../../fixture-builder');
 
 describe('Dapp interactions', function () {
   it('should trigger the add chain confirmation despite MetaMask being locked', async function () {

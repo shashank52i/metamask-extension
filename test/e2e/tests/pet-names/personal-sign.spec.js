@@ -6,8 +6,8 @@ const {
   regularDelayMs,
   unlockWallet,
   WINDOW_TITLES,
-} = require('../helpers');
-const FixtureBuilder = require('../fixture-builder');
+} = require('../../helpers');
+const FixtureBuilder = require('../../fixture-builder');
 
 describe('Personal sign', function () {
   it('can initiate and confirm a personal sign', async function () {

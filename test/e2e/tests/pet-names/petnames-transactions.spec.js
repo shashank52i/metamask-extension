@@ -5,8 +5,8 @@ const {
   unlockWallet,
   defaultGanacheOptions,
   openActionMenuAndStartSendFlow,
-} = require('../helpers');
-const FixtureBuilder = require('../fixture-builder');
+} = require('../../helpers');
+const FixtureBuilder = require('../../fixture-builder');
 const {
   expectName,
   focusTestDapp,

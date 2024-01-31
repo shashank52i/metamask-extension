@@ -4,9 +4,9 @@ const {
   withFixtures,
   unlockWallet,
   defaultGanacheOptions,
-} = require('../helpers');
-const FixtureBuilder = require('../fixture-builder');
-const { TEST_SNAPS_WEBSITE_URL } = require('../snaps/enums');
+} = require('../../helpers');
+const FixtureBuilder = require('../../fixture-builder');
+const { TEST_SNAPS_WEBSITE_URL } = require('../../snaps/enums');
 const {
   expectName,
   focusTestDapp,
