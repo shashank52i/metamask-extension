@@ -72,6 +72,8 @@ ignores:
   - 'stream-http'
   - 'webpack-dev-server'
   - 'sass-embedded'
+  # babel
+  - '@babel/plugin-transform-logical-assignment-operators'
 
 # files depcheck should not parse
 ignorePatterns:

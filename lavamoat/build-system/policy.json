@@ -152,8 +152,8 @@
         "define": true
       },
       "packages": {
-        "terser-webpack-plugin>@jridgewell/trace-mapping": true,
-        "terser>@jridgewell/source-map>@jridgewell/gen-mapping": true
+        "terser>@jridgewell/source-map>@jridgewell/gen-mapping": true,
+        "terser>@jridgewell/source-map>@jridgewell/trace-mapping": true
       }
     },
     "@babel/core>@babel/generator": {
@@ -164,8 +164,8 @@
       "packages": {
         "@babel/core>@babel/generator>jsesc": true,
         "@babel/core>@babel/types": true,
-        "terser-webpack-plugin>@jridgewell/trace-mapping": true,
-        "terser>@jridgewell/source-map>@jridgewell/gen-mapping": true
+        "terser>@jridgewell/source-map>@jridgewell/gen-mapping": true,
+        "terser>@jridgewell/source-map>@jridgewell/trace-mapping": true
       }
     },
     "@babel/core>@babel/generator>jsesc": {
@@ -182,7 +182,7 @@
         "@babel/core>@babel/helper-compilation-targets>semver": true,
         "@babel/preset-env>@babel/compat-data": true,
         "@babel/preset-env>@babel/helper-validator-option": true,
-        "mockttp>@httptoolkit/proxy-agent>lru-cache": true,
+        "depcheck>@vue/compiler-sfc>lru-cache": true,
         "webpack>browserslist": true
       }
     },
@@ -548,10 +548,10 @@
         "@babel/preset-env>@babel/plugin-transform-classes>@babel/helper-annotate-as-pure": true,
         "@babel/preset-env>@babel/plugin-transform-classes>@babel/helper-optimise-call-expression": true,
         "@babel/preset-env>@babel/plugin-transform-classes>@babel/helper-replace-supers": true,
+        "@babel/preset-env>@babel/plugin-transform-classes>globals": true,
         "depcheck>@babel/traverse>@babel/helper-environment-visitor": true,
         "depcheck>@babel/traverse>@babel/helper-function-name": true,
-        "depcheck>@babel/traverse>@babel/helper-split-export-declaration": true,
-        "depcheck>@babel/traverse>globals": true
+        "depcheck>@babel/traverse>@babel/helper-split-export-declaration": true
       }
     },
     "@babel/preset-env>@babel/plugin-transform-classes>@babel/helper-annotate-as-pure": {
@@ -1417,13 +1417,34 @@
         "process.env.AUTOPREFIXER_GRID": true
       },
       "packages": {
+        "autoprefixer>browserslist": true,
         "autoprefixer>caniuse-lite": true,
         "autoprefixer>fraction.js": true,
         "autoprefixer>normalize-range": true,
         "postcss": true,
         "postcss>picocolors": true,
-        "stylelint>postcss-value-parser": true,
-        "webpack>browserslist": true
+        "stylelint>postcss-value-parser": true
+      }
+    },
+    "autoprefixer>browserslist": {
+      "builtin": {
+        "fs.existsSync": true,
+        "fs.readFileSync": true,
+        "fs.statSync": true,
+        "path.basename": true,
+        "path.dirname": true,
+        "path.join": true,
+        "path.resolve": true
+      },
+      "globals": {
+        "console.warn": true,
+        "process.env": true,
+        "process.versions.node": true
+      },
+      "packages": {
+        "autoprefixer>browserslist>electron-to-chromium": true,
+        "autoprefixer>browserslist>node-releases": true,
+        "autoprefixer>caniuse-lite": true
       }
     },
     "babelify": {
@@ -2324,6 +2345,11 @@
         "@babel/core>@babel/types": true
       }
     },
+    "depcheck>@vue/compiler-sfc>lru-cache": {
+      "packages": {
+        "depcheck>@vue/compiler-sfc>lru-cache>yallist": true
+      }
+    },
     "depcheck>cosmiconfig>parse-json": {
       "packages": {
         "@babel/code-frame": true,
@@ -2596,7 +2622,7 @@
         "eslint-plugin-react": true,
         "eslint-plugin-react-hooks": true,
         "eslint>@eslint/eslintrc>ajv": true,
-        "eslint>@eslint/eslintrc>globals": true,
+        "eslint>globals": true,
         "eslint>ignore": true,
         "eslint>minimatch": true,
         "mocha>strip-json-comments": true,
@@ -2876,7 +2902,6 @@
         "fs.stat": true,
         "fs.statSync": true,
         "os.cpus": true,
-        "os.platform": true,
         "path.basename": true,
         "path.resolve": true,
         "stream.PassThrough": true,
@@ -5672,7 +5697,6 @@
         "events": true,
         "fs.readFileSync": true,
         "node:fs/promises.readFile": true,
-        "node:fs/promises.writeFile": true,
         "path.extname": true,
         "path.join": true
       },
@@ -5843,11 +5867,6 @@
       },
       "packages": {
         "chalk>supports-color>has-flag": true
-      }
-    },
-    "mockttp>@httptoolkit/proxy-agent>lru-cache": {
-      "packages": {
-        "mockttp>@httptoolkit/proxy-agent>lru-cache>yallist": true
       }
     },
     "nock>debug": {
@@ -7063,15 +7082,6 @@
         "terser>@jridgewell/source-map": true
       }
     },
-    "terser-webpack-plugin>@jridgewell/trace-mapping": {
-      "globals": {
-        "define": true
-      },
-      "packages": {
-        "terser-webpack-plugin>@jridgewell/trace-mapping>@jridgewell/resolve-uri": true,
-        "terser-webpack-plugin>@jridgewell/trace-mapping>@jridgewell/sourcemap-codec": true
-      }
-    },
     "terser-webpack-plugin>@jridgewell/trace-mapping>@jridgewell/resolve-uri": {
       "globals": {
         "define": true
@@ -7096,14 +7106,23 @@
         "define": true
       },
       "packages": {
-        "terser-webpack-plugin>@jridgewell/trace-mapping": true,
         "terser-webpack-plugin>@jridgewell/trace-mapping>@jridgewell/sourcemap-codec": true,
-        "terser>@jridgewell/source-map>@jridgewell/gen-mapping>@jridgewell/set-array": true
+        "terser>@jridgewell/source-map>@jridgewell/gen-mapping>@jridgewell/set-array": true,
+        "terser>@jridgewell/source-map>@jridgewell/trace-mapping": true
       }
     },
     "terser>@jridgewell/source-map>@jridgewell/gen-mapping>@jridgewell/set-array": {
       "globals": {
         "define": true
+      }
+    },
+    "terser>@jridgewell/source-map>@jridgewell/trace-mapping": {
+      "globals": {
+        "define": true
+      },
+      "packages": {
+        "terser-webpack-plugin>@jridgewell/trace-mapping>@jridgewell/resolve-uri": true,
+        "terser-webpack-plugin>@jridgewell/trace-mapping>@jridgewell/sourcemap-codec": true
       }
     },
     "terser>source-map-support>buffer-from": {
@@ -7462,7 +7481,7 @@
         "process.versions.node": true
       },
       "packages": {
-        "autoprefixer>caniuse-lite": true,
+        "webpack>browserslist>caniuse-lite": true,
         "webpack>browserslist>electron-to-chromium": true,
         "webpack>browserslist>node-releases": true
       }
