@@ -7,6 +7,6 @@ if (isNaN(launchPid) || launchPid !== process.ppid) {
 
 require('./build').build(() => {
   // stop writing, as once the parent goes away the tty can be ignored.
-  [process.stdout, process.stderr].forEach(out => out.cork());
-  process.kill(launchPid, "SIGUSR2");
+  [process.stdout, process.stderr].forEach((out) => out.cork());
+  process.kill(launchPid, 'SIGUSR2');
 });

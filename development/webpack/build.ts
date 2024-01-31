@@ -1,10 +1,6 @@
 import webpack from 'webpack';
 import type WebpackDevServerType from 'webpack-dev-server';
-import {
-  noop,
-  logSummary,
-  __HMR_READY__,
-} from './utils/helpers';
+import { noop, logSummary, __HMR_READY__ } from './utils/helpers';
 import config from './webpack.config.js';
 
 // disable browserslist stats as it needlessly traverses the filesystem multiple
@@ -43,12 +39,12 @@ export function build(onBuild: () => void = noop) {
     if (config.watch) {
       // once HMR is ready (__HMR_READY__ variable), this section should be removed.
       compiler.watch(config.watchOptions, (err, stats) => {
-        logSummary(config.stats !== "none", err, stats);
+        logSummary(config.stats !== 'none', err, stats);
         console.error('🦊 Watching for changes…');
       });
     } else {
       compiler.run((err, stats) => {
-        logSummary(config.stats !== "none", err, stats);
+        logSummary(config.stats !== 'none', err, stats);
         onBuild();
         compiler.close(noop);
       });
