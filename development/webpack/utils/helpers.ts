@@ -1,5 +1,5 @@
 import { readFileSync, readdirSync } from 'node:fs';
-import { parse, join, relative } from 'node:path';
+import { parse, join, relative, sep } from 'node:path';
 import type zlib from 'node:zlib';
 import process from 'node:process';
 import { isatty } from 'node:tty';
@@ -26,9 +26,11 @@ export type Browser = (typeof Browsers)[number];
 export const __HMR_READY__ = false;
 
 /**
- * Regular expression to match files in `node_modules`
+ * Regular expression to match files in any `node_modules` directory
+ * Uses a platform-specific path separator: `/` on Unix-like systems and `\` on
+ * Windows.
  */
-export const NODE_MODULES_RE = /^.*\/node_modules\/.*$/u;
+export const NODE_MODULES_RE = new RegExp(`^(?:.*\\${sep})?node_modules(?:\\${sep}.*)?$`, "u");
 
 /**
  * No Operation. A function that does nothing and returns nothing.
