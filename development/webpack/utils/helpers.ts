@@ -25,12 +25,13 @@ export type Browser = (typeof Browsers)[number];
 // TODO: remove this variable when HMR is ready.
 export const __HMR_READY__ = false;
 
+const slash = `(?:\\${sep})?`;
 /**
  * Regular expression to match files in any `node_modules` directory
  * Uses a platform-specific path separator: `/` on Unix-like systems and `\` on
  * Windows.
  */
-export const NODE_MODULES_RE = new RegExp(`^(?:.*\\${sep})?node_modules(?:\\${sep}.*)?$`, "u");
+export const NODE_MODULES_RE = new RegExp(`${slash}node_modules${slash}`, "u");
 
 /**
  * No Operation. A function that does nothing and returns nothing.
