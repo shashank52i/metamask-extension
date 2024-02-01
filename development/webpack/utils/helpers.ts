@@ -5,7 +5,7 @@ import process from 'node:process';
 import { isatty } from 'node:tty';
 import { SemVerVersion, isValidSemVerVersion } from '@metamask/utils';
 import { merge } from 'lodash';
-import type chalkType from 'chalk';
+import chalk from 'chalk';
 import { Chunk, type EntryObject, type Stats, version } from 'webpack';
 import type TerserPluginType from 'terser-webpack-plugin';
 
@@ -31,7 +31,7 @@ const slash = `(?:\\${sep})?`;
  * Uses a platform-specific path separator: `/` on Unix-like systems and `\` on
  * Windows.
  */
-export const NODE_MODULES_RE = new RegExp(`${slash}node_modules${slash}`, "u");
+export const NODE_MODULES_RE = new RegExp(`${slash}node_modules${slash}`, 'u');
 
 /**
  * No Operation. A function that does nothing and returns nothing.
@@ -228,12 +228,11 @@ function assertValidEntryFileName(file: string, dir: string) {
     return;
   }
 
-  const chalk: typeof chalkType = require('chalk');
   throw new DetailedError({
-    problem: chalk`{red.inverse Invalid Filename Detected}\nPath: {bold.white.dim '${relative(
+    problem: chalk`{red.inverse Invalid Filename Detected}\nPath: {bold.white.dim ${relative(
       process.cwd(),
       join(dir, file),
-    )}'}`,
+    )}}`,
     reason: chalk`Filenames at the root of the extension directory starting with {green "_"} are reserved for use by the browser.`,
     solutions: [
       chalk`Rename this file to remove the underscore (e.g., {bold.white.dim '${file}'} to {bold.white.dim '${file.slice(
@@ -254,17 +253,16 @@ export type DetailedErrorMessage = {
 
 export class DetailedError extends Error {
   constructor({ problem, reason, solutions, context }: DetailedErrorMessage) {
-    const chalk: typeof chalkType = require('chalk');
     const message = `${chalk.red(problem)}
 ${chalk.red('Reason:')} ${chalk.white(reason)}
 
 ${chalk.white.bold(`Suggested Action${solutions.length === 1 ? '' : 's'}:`)}
 ${solutions
-  .map((solution) => `${chalk.hex('EF811A')('•')} ${chalk.white(solution)}`)
+  .map((solution) => chalk`{hex('f6851b') •} {white ${solution}}`)
   .join('\n')}
 ${
   context
-    ? `\n${chalk.white.dim.bold('Context:')} ${chalk.white.dim(context)}`
+    ? chalk`\n{white.dim.bold Context:} {white.dim ${context}}`
     : ``
 }
 `;
@@ -345,22 +343,16 @@ export function getMinimizers() {
 }
 
 const colors = isatty(process.stderr.fd) ? process.stderr.getColorDepth() : 1;
-function green(message: string) {
-  return colors === 1 ? message : `\x1b[1;32m${message}\x1b[0m`;
-}
-function orange(message: string): string {
-  switch (colors) {
-    case 24: // 2**24 colors; return metamask orange as RGB
-      return `\x1b[1;38;2;246;133;27m${message}\x1b[0m`;
-    case 8: // 256 colors; return approximate metamask orange
-      return `\x1b[1;38;5;208m${message}\x1b[0m`;
-    case 4: // 16 colors; return yellow :-(
-      return `\x1b[1;33m${message}\x1b[0m`;
-    case 1: // no colors; return normal text :-(
-    default:
-      return message;
-  }
-}
+const { toGreen, toOrange } = (() => {
+  const colorize = (code: string, str: string) => `\x1b[${code}m${str}\x1b[0m`;
+  const echo = (str: string) => str;
+  // 24: metamask orange, 8: close to metamask orange, 4: yellow :-(
+  const mm = { 24: '1;38;2;246;133;27', 8: '1;38;5;208', 4: '1;33' };
+  return {
+    toGreen: colors > 1 ? colorize.bind(null, '1;32') : echo,
+    toOrange: colors > 1 ? colorize.bind(null, mm[colors as 24 | 8 | 4]) : echo,
+  };
+})();
 
 /**
  * Logs a summary of build information to `stderr`.
@@ -378,7 +370,7 @@ export function logSummary(
   err && console.error(err);
 
   if (stats) {
-    stats.compilation.name = orange(`🦊 ${stats.compilation.compiler.name}`);
+    stats.compilation.name = toOrange(`🦊 ${stats.compilation.compiler.name}`);
     if (logStats) {
       // log everything (computing stats is slow, so we only do it if asked).
       console.error(stats.toString({ colors }));
@@ -389,7 +381,7 @@ export function logSummary(
     } else {
       // otherwise, just log a simple update
       console.error(
-        `${stats.compilation.name} (webpack ${version}) compiled ${green(
+        `${stats.compilation.name} (webpack ${version}) compiled ${toGreen(
           'successfully',
         )} in ${stats.endTime - stats.startTime}ms`,
       );
