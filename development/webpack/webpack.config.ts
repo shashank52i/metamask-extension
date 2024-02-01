@@ -1,5 +1,5 @@
 import { readFileSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { join } from 'node:path';
 import {
   ProvidePlugin,
   type RuleSetRule,
@@ -344,7 +344,7 @@ const config = {
       return '[id].[contenthash].js';
     },
 
-    path: resolve(__dirname, `../../dist/webpack/${BROWSER}`),
+    path: join(__dirname, `../../dist/webpack/${BROWSER}`),
     // Clean the output directory before emit, so that only the latest build
     // files remain. Nearly 0 performance penalty for this clean up step.
     clean: true,
@@ -478,8 +478,8 @@ const config = {
                 includePaths: [
                   // enables aliases to `@use design - system`,
                   // `@use utilities`, etc.
-                  './ui/css',
-                  './node_modules',
+                  join(__dirname, '../../ui/css'),
+                  join(__dirname, '../../node_modules'),
                 ],
 
                 // Disable the webpackImporter, as we:
