@@ -346,16 +346,16 @@ export function getMinimizers() {
 
 const colors = isatty(process.stderr.fd) ? process.stderr.getColorDepth() : 1;
 function green(message: string) {
-  return colors ? message : `\x1b[1;32m${message}\x1b[0m`;
+  return colors === 1 ? message : `\x1b[1;32m${message}\x1b[0m`;
 }
 function orange(message: string): string {
   switch (colors) {
-    case 4: // 16 colors; return yellow :-(
-      return `\x1b[1;33m${message}\x1b[0m`;
-    case 8: // 256 colors; return approximate metamask orange
-      return `\x1b[1;38;5;208m${message}\x1b[0m`;
     case 24: // 2**24 colors; return metamask orange as RGB
       return `\x1b[1;38;2;246;133;27m${message}\x1b[0m`;
+    case 8: // 256 colors; return approximate metamask orange
+      return `\x1b[1;38;5;208m${message}\x1b[0m`;
+    case 4: // 16 colors; return yellow :-(
+      return `\x1b[1;33m${message}\x1b[0m`;
     case 1: // no colors; return normal text :-(
     default:
       return message;
