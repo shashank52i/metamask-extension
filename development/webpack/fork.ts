@@ -1,3 +1,15 @@
+/**
+ * @file Executes the build process in a child process environment, ensuring it
+ * was correctly spawned by checking for a `PPID` environment variable that
+ * matches the parent's process ID. This script is responsible for running the
+ * build logic defined in './build' and managing output streams to prevent
+ * unwanted output after completion. It leverages IPC for communication back to
+ * the parent process or falls back to sending a POSIX signal (`SIGUSR2`) to
+ * signal completion.
+ * @see {@link ./launch.ts}
+ * @author David Murdoch <david.murdoch@consensys.net>
+ */
+
 const PPID = Number(process.env.PPID);
 if (isNaN(PPID) || PPID !== process.ppid) {
   throw new Error(
@@ -5,11 +17,13 @@ if (isNaN(PPID) || PPID !== process.ppid) {
   );
 }
 
-require('./build').build(() => {
-  // stop writing because the parent process is still listening to these streams
-  // and we don't want any more output to be shown to the user.
-  process.stdout.write = process.stderr.write = () => true;
+import('./build').then(({ build }) =>
+  build(() => {
+    // stop writing now because the parent process is still listening to these
+    // streams and we don't want any more output to be shown to the user.
+    process.stdout.write = process.stderr.write = () => true;
 
-  // use IPC if we have it, otherwise send a POSIX signal
-  process.send?.('SIGUSR2') || process.kill(PPID, 'SIGUSR2');
-});
+    // use IPC if we have it, otherwise send a POSIX signal
+    process.send?.('SIGUSR2') || process.kill(PPID, 'SIGUSR2');
+  }),
+);

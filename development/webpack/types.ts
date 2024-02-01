@@ -3,24 +3,32 @@ import { type Readable } from 'node:stream';
 import { type Socket } from 'node:net';
 import { type IPty } from 'node-pty';
 
-// node's ChildProcess type is incomplete
-export type Child = ChildProcess & {
-  stderr?: Readable & { unref: () => Readable };
-  stdout?: Readable & { unref: () => Readable };
-};
+/**
+ * A more complete type for the `node-pty` module's `IPty` interface
+ */
+export interface PTY extends IPty {
+  master: Socket;
+  slave: Socket;
+}
+
+/**
+ * Node's ChildProcess type extended with `stderr` and `stdout`'s `unref`
+ * method, which is missing from the standard Node.js types.
+ */
+export interface Child extends ChildProcess {
+  stderr: (Readable & { unref: () => Readable }) | null;
+  stdout: (Readable & { unref: () => Readable }) | null;
+}
 
 export type StdName = 'stdout' | 'stderr';
 
+/**
+ * The control interface for a child process's stdio streams.
+ */
 export interface Stdio {
-  unref: (child: Child) => void;
-  destroy: () => void;
+  kill: () => void;
   listen: (child: Child) => void;
   pty: Socket | 'pipe';
   resize: () => void;
+  unref: (child: Child) => void;
 }
-
-export type WriteStream = NodeJS.WriteStream;
-
-export type Process = NodeJS.Process;
-
-export type PTY = IPty & { master: Socket; slave: Socket };

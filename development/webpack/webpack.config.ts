@@ -1,3 +1,8 @@
+/**
+ * @file The main webpack configuration file for the browser extension.
+ * @author David Murdoch <david.murdoch@consensys.net>
+ */
+
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import {
