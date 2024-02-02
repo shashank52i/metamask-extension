@@ -66,8 +66,8 @@ function fork(process: NodeJS.Process, file: string, argv: string[]) {
 }
 
 /**
- * Create the stdio streams for the child process to use and for the parent to
- * control and listen to.
+ * Create the stdio streams (stderr and stdout) for the child process to use and
+ * for the parent to control and listen to.
  *
  * @param process - The parent process, like `globalThis.process`
  * @returns The stdio streams for the child process to use
