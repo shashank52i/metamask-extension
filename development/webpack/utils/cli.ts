@@ -83,14 +83,12 @@ export const parseArgv = (argv: string[]) => {
     .sort(([a], [b]) => a.localeCompare(b));
   return {
     // narrow the `config` type to only the options we're returning
-    args: conf as {
-      [key in OptionsKeys]: (typeof conf)[key];
-    },
+    args: conf as { [key in OptionsKeys]: (typeof conf)[key] },
     cacheKey: JSON.stringify(cacheKey),
     features: {
       active,
       all: new Set(allFeatureNames),
-    }
+    },
   };
 };
 
