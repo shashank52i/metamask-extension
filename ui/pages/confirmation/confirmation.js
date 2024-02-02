@@ -40,6 +40,7 @@ import SnapAuthorshipHeader from '../../components/app/snaps/snap-authorship-hea
 import { SNAP_MANAGE_ACCOUNTS_CONFIRMATION_TYPES } from '../../../shared/constants/app';
 ///: END:ONLY_INCLUDE_IF
 import { DAY } from '../../../shared/constants/time';
+import { SnapUIRenderer } from '../../components/app/snaps/snap-ui-renderer';
 import ConfirmationFooter from './components/confirmation-footer';
 import {
   getTemplateValues,
@@ -462,7 +463,22 @@ export default function ConfirmationPage({
           )
           ///: END:ONLY_INCLUDE_IF
         }
-        <MetaMaskTemplateRenderer sections={templatedValues.content} />
+        {
+          ///: BEGIN:ONLY_INCLUDE_IF(snaps)
+          isSnapDialog ? (
+            <Box marginRight={4} marginLeft={4} marginTop={4}>
+              <SnapUIRenderer
+                snapId={pendingConfirmation?.origin}
+                interfaceId={pendingConfirmation?.requestData.id}
+              />
+            </Box>
+          ) : (
+            ///: END:ONLY_INCLUDE_IF
+            <MetaMaskTemplateRenderer sections={templatedValues.content} />
+            ///: BEGIN:ONLY_INCLUDE_IF(snaps)
+          )
+          ///: END:ONLY_INCLUDE_IF
+        }
         {showWarningModal && (
           <ConfirmationWarningModal
             onSubmit={async () => {
