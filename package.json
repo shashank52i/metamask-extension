@@ -239,6 +239,7 @@
     "@fortawesome/fontawesome-free": "^5.13.0",
     "@keystonehq/bc-ur-registry-eth": "^0.19.1",
     "@keystonehq/metamask-airgapped-keyring": "^0.13.1",
+    "@lavamoat/lavadome-react": "0.0.10",
     "@lavamoat/snow": "^2.0.1",
     "@material-ui/core": "^4.11.0",
     "@metamask-institutional/custody-controller": "^0.2.18",
@@ -300,7 +301,7 @@
     "@metamask/snaps-rpc-methods": "^5.0.0",
     "@metamask/snaps-sdk": "^1.4.0",
     "@metamask/snaps-utils": "^5.2.0",
-    "@metamask/transaction-controller": "^21.0.1",
+    "@metamask/transaction-controller": "^21.1.0",
     "@metamask/user-operation-controller": "^1.0.0",
     "@metamask/utils": "^8.2.1",
     "@ngraveio/bc-ur": "^1.1.6",
@@ -311,7 +312,7 @@
     "@sentry/integrations": "^7.53.0",
     "@sentry/types": "^7.53.0",
     "@sentry/utils": "^7.53.0",
-    "@swc/core": "^1.3.102",
+    "@swc/core": "^1.3.107",
     "@trezor/connect-web": "9.0.11",
     "@zxing/browser": "^0.1.4",
     "@zxing/library": "0.20.0",
@@ -401,6 +402,7 @@
     "@babel/preset-typescript": "^7.23.2",
     "@babel/register": "^7.22.15",
     "@lavamoat/allow-scripts": "^3.0.1",
+    "@lavamoat/lavadome-core": "0.0.10",
     "@lavamoat/lavapack": "^6.0.2",
     "@metamask/auto-changelog": "^2.1.0",
     "@metamask/build-utils": "^1.0.0",
@@ -430,7 +432,7 @@
     "@storybook/react": "^7.4.6",
     "@storybook/react-webpack5": "^7.4.6",
     "@storybook/storybook-deployer": "^2.8.16",
-    "@storybook/test-runner": "^0.10.0",
+    "@storybook/test-runner": "^0.14.1",
     "@storybook/theming": "^7.4.6",
     "@swc/helpers": "^0.5.3",
     "@testing-library/jest-dom": "^5.11.10",
@@ -452,7 +454,7 @@
     "@types/jest": "^29.1.2",
     "@types/madge": "^5.0.0",
     "@types/mocha": "^10.0.3",
-    "@types/node": "^18",
+    "@types/node": "^20",
     "@types/pify": "^5.0.1",
     "@types/pump": "^1.1.1",
     "@types/react": "^16.9.53",
@@ -613,8 +615,8 @@
     "yargs-parser": "^21.1.1"
   },
   "engines": {
-    "node": ">= 18",
-    "yarn": "^4.0.0-rc.48"
+    "node": ">= 20",
+    "yarn": "^4.0.2"
   },
   "lavamoat": {
     "allowScripts": {
@@ -668,10 +670,8 @@
       "resolve-url-loader>es6-iterator>es5-ext": false,
       "@storybook/test-runner>playwright": true,
       "@metamask/eth-trezor-keyring>@trezor/connect-web>@trezor/connect>@trezor/transport>protobufjs": false,
-      "@metamask/eth-trezor-keyring>@trezor/connect-web>@trezor/connect>@trezor/transport>usb": false,
       "@metamask/eth-trezor-keyring>@trezor/connect-web>@trezor/connect>@trezor/utxo-lib>blake-hash": false,
       "@metamask/eth-trezor-keyring>@trezor/connect-web>@trezor/connect>@trezor/utxo-lib>tiny-secp256k1": false,
-      "@metamask/ethjs-query>babel-runtime>core-js": false,
       "@metamask/eth-trezor-keyring>hdkey>secp256k1": false,
       "@storybook/addon-knobs>core-js": false,
       "@storybook/manager-webpack5>core-js": false,
@@ -690,7 +690,10 @@
       "@storybook/react-webpack5>@storybook/builder-webpack5>@swc/core": false,
       "@swc/core": true,
       "node-pty": true,
-      "$root$": false
+      "$root$": false,
+      "@metamask/eth-trezor-keyring>@trezor/connect-web>@trezor/connect>@trezor/transport>usb": false,
+      "@metamask/ethjs-query>babel-runtime>core-js": false,
+      "@storybook/test-runner>@swc/core": false
     }
   },
   "packageManager": "yarn@4.0.2"

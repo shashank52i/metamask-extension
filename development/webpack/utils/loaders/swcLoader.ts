@@ -159,7 +159,8 @@ export default function swcLoader(
     inputSourceMap,
     sourceMaps: this.sourceMap,
     sourceFileName: filename,
-    // TODO: remove cast when swc's `Options` type is fixed
+    swcrc: false,
+    // TODO: remove this `as Options` cast when swc's `Options` type is fixed
     // see: https://github.com/swc-project/swc/issues/8494
   } as Options;
 

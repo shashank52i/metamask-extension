@@ -50,12 +50,7 @@
         "process.versions.node.split": true
       },
       "packages": {
-        "@babel/code-frame>@babel/highlight>chalk>supports-color>has-flag": true
-      }
-    },
-    "@babel/code-frame>@babel/highlight>chalk>supports-color>has-flag": {
-      "globals": {
-        "process.argv": true
+        "gulp-livereload>chalk>supports-color>has-flag": true
       }
     },
     "@babel/code-frame>chalk": {
@@ -91,12 +86,7 @@
         "process.versions.node.split": true
       },
       "packages": {
-        "@babel/code-frame>chalk>supports-color>has-flag": true
-      }
-    },
-    "@babel/code-frame>chalk>supports-color>has-flag": {
-      "globals": {
-        "process.argv": true
+        "gulp-livereload>chalk>supports-color>has-flag": true
       }
     },
     "@babel/core": {
@@ -152,8 +142,8 @@
         "define": true
       },
       "packages": {
-        "terser>@jridgewell/source-map>@jridgewell/gen-mapping": true,
-        "terser>@jridgewell/source-map>@jridgewell/trace-mapping": true
+        "terser-webpack-plugin>@jridgewell/trace-mapping": true,
+        "terser>@jridgewell/source-map>@jridgewell/gen-mapping": true
       }
     },
     "@babel/core>@babel/generator": {
@@ -164,8 +154,8 @@
       "packages": {
         "@babel/core>@babel/generator>jsesc": true,
         "@babel/core>@babel/types": true,
-        "terser>@jridgewell/source-map>@jridgewell/gen-mapping": true,
-        "terser>@jridgewell/source-map>@jridgewell/trace-mapping": true
+        "terser-webpack-plugin>@jridgewell/trace-mapping": true,
+        "terser>@jridgewell/source-map>@jridgewell/gen-mapping": true
       }
     },
     "@babel/core>@babel/generator>jsesc": {
@@ -179,11 +169,16 @@
         "process.versions.node": true
       },
       "packages": {
+        "@babel/core>@babel/helper-compilation-targets>lru-cache": true,
         "@babel/core>@babel/helper-compilation-targets>semver": true,
         "@babel/preset-env>@babel/compat-data": true,
         "@babel/preset-env>@babel/helper-validator-option": true,
-        "depcheck>@vue/compiler-sfc>lru-cache": true,
         "webpack>browserslist": true
+      }
+    },
+    "@babel/core>@babel/helper-compilation-targets>lru-cache": {
+      "packages": {
+        "@babel/core>@babel/helper-compilation-targets>lru-cache>yallist": true
       }
     },
     "@babel/core>@babel/helper-compilation-targets>semver": {
@@ -1417,34 +1412,13 @@
         "process.env.AUTOPREFIXER_GRID": true
       },
       "packages": {
-        "autoprefixer>browserslist": true,
         "autoprefixer>caniuse-lite": true,
         "autoprefixer>fraction.js": true,
         "autoprefixer>normalize-range": true,
         "postcss": true,
         "postcss>picocolors": true,
-        "stylelint>postcss-value-parser": true
-      }
-    },
-    "autoprefixer>browserslist": {
-      "builtin": {
-        "fs.existsSync": true,
-        "fs.readFileSync": true,
-        "fs.statSync": true,
-        "path.basename": true,
-        "path.dirname": true,
-        "path.join": true,
-        "path.resolve": true
-      },
-      "globals": {
-        "console.warn": true,
-        "process.env": true,
-        "process.versions.node": true
-      },
-      "packages": {
-        "autoprefixer>browserslist>electron-to-chromium": true,
-        "autoprefixer>browserslist>node-releases": true,
-        "autoprefixer>caniuse-lite": true
+        "stylelint>postcss-value-parser": true,
+        "webpack>browserslist": true
       }
     },
     "babelify": {
@@ -2345,11 +2319,6 @@
         "@babel/core>@babel/types": true
       }
     },
-    "depcheck>@vue/compiler-sfc>lru-cache": {
-      "packages": {
-        "depcheck>@vue/compiler-sfc>lru-cache>yallist": true
-      }
-    },
     "depcheck>cosmiconfig>parse-json": {
       "packages": {
         "@babel/code-frame": true,
@@ -2902,6 +2871,7 @@
         "fs.stat": true,
         "fs.statSync": true,
         "os.cpus": true,
+        "os.platform": true,
         "path.basename": true,
         "path.resolve": true,
         "stream.PassThrough": true,
@@ -5866,7 +5836,12 @@
         "process.platform": true
       },
       "packages": {
-        "chalk>supports-color>has-flag": true
+        "mocha>supports-color>has-flag": true
+      }
+    },
+    "mocha>supports-color>has-flag": {
+      "globals": {
+        "process.argv": true
       }
     },
     "nock>debug": {
@@ -7082,6 +7057,15 @@
         "terser>@jridgewell/source-map": true
       }
     },
+    "terser-webpack-plugin>@jridgewell/trace-mapping": {
+      "globals": {
+        "define": true
+      },
+      "packages": {
+        "terser-webpack-plugin>@jridgewell/trace-mapping>@jridgewell/resolve-uri": true,
+        "terser-webpack-plugin>@jridgewell/trace-mapping>@jridgewell/sourcemap-codec": true
+      }
+    },
     "terser-webpack-plugin>@jridgewell/trace-mapping>@jridgewell/resolve-uri": {
       "globals": {
         "define": true
@@ -7106,23 +7090,14 @@
         "define": true
       },
       "packages": {
+        "terser-webpack-plugin>@jridgewell/trace-mapping": true,
         "terser-webpack-plugin>@jridgewell/trace-mapping>@jridgewell/sourcemap-codec": true,
-        "terser>@jridgewell/source-map>@jridgewell/gen-mapping>@jridgewell/set-array": true,
-        "terser>@jridgewell/source-map>@jridgewell/trace-mapping": true
+        "terser>@jridgewell/source-map>@jridgewell/gen-mapping>@jridgewell/set-array": true
       }
     },
     "terser>@jridgewell/source-map>@jridgewell/gen-mapping>@jridgewell/set-array": {
       "globals": {
         "define": true
-      }
-    },
-    "terser>@jridgewell/source-map>@jridgewell/trace-mapping": {
-      "globals": {
-        "define": true
-      },
-      "packages": {
-        "terser-webpack-plugin>@jridgewell/trace-mapping>@jridgewell/resolve-uri": true,
-        "terser-webpack-plugin>@jridgewell/trace-mapping>@jridgewell/sourcemap-codec": true
       }
     },
     "terser>source-map-support>buffer-from": {
@@ -7481,7 +7456,7 @@
         "process.versions.node": true
       },
       "packages": {
-        "webpack>browserslist>caniuse-lite": true,
+        "autoprefixer>caniuse-lite": true,
         "webpack>browserslist>electron-to-chromium": true,
         "webpack>browserslist>node-releases": true
       }
