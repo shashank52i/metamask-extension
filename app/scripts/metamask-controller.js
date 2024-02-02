@@ -1171,8 +1171,8 @@ export default class MetamaskController extends EventEmitter {
         `${this.permissionController.name}:grantPermissions`,
         `${this.subjectMetadataController.name}:getSubjectMetadata`,
         `${this.subjectMetadataController.name}:addSubjectMetadata`,
-        `${this.phishingController.name}:maybeUpdateState`,
-        `${this.phishingController.name}:testOrigin`,
+        `${this.snapInterfaceController.name}:createInterface`,
+        `${this.snapInterfaceController.name}:getInterface`,
         'ExecutionService:executeSnap',
         'ExecutionService:getRpcRequestHandler',
         'ExecutionService:terminateSnap',
@@ -1954,6 +1954,7 @@ export default class MetamaskController extends EventEmitter {
       CronjobController: this.cronjobController,
       SnapsRegistry: this.snapsRegistry,
       NotificationController: this.notificationController,
+      SnapInterfaceController: this.snapInterfaceController,
       ///: END:ONLY_INCLUDE_IF
       ///: BEGIN:ONLY_INCLUDE_IF(desktop)
       DesktopController: this.desktopController.store,
@@ -2005,6 +2006,7 @@ export default class MetamaskController extends EventEmitter {
         CronjobController: this.cronjobController,
         SnapsRegistry: this.snapsRegistry,
         NotificationController: this.notificationController,
+        SnapInterfaceController: this.snapInterfaceController,
         ///: END:ONLY_INCLUDE_IF
         ///: BEGIN:ONLY_INCLUDE_IF(desktop)
         DesktopController: this.desktopController.store,
@@ -2314,6 +2316,10 @@ export default class MetamaskController extends EventEmitter {
               origin,
             ).result;
           },
+          createInterface: this.controllerMessenger.call.bind(
+            this.controllerMessenger,
+            'SnapInterfaceController:createInterface',
+          ),
           ///: END:ONLY_INCLUDE_IF
           ///: BEGIN:ONLY_INCLUDE_IF(keyring-snaps)
           getSnapKeyring: this.getSnapKeyring.bind(this),
@@ -3178,6 +3184,14 @@ export default class MetamaskController extends EventEmitter {
 
         return phishingController.test(website);
       },
+      deleteInterface: this.controllerMessenger.call.bind(
+        this.controllerMessenger,
+        'SnapInterfaceController:deleteInterface',
+      ),
+      updateInterfaceState: this.controllerMessenger.call.bind(
+        this.controllerMessenger,
+        'SnapInterfaceController:updateInterfaceState',
+      ),
       ///: END:ONLY_INCLUDE_IF
       ///: BEGIN:ONLY_INCLUDE_IF(desktop)
       // Desktop
@@ -4895,6 +4909,22 @@ export default class MetamaskController extends EventEmitter {
           this.handleSnapRequest({ ...args, origin }),
         getAllowedKeyringMethods: keyringSnapPermissionsBuilder(
           this.subjectMetadataController,
+          origin,
+        ),
+        createInterface: this.controllerMessenger.call.bind(
+          this.controllerMessenger,
+          'SnapInterfaceController:createInterface',
+          origin,
+        ),
+        getInterfaceState: (...args) =>
+          this.controllerMessenger.call(
+            'SnapInterfaceController:getInterface',
+            origin,
+            ...args,
+          ),
+        updateInterface: this.controllerMessenger.call.bind(
+          this.controllerMessenger,
+          'SnapInterfaceController:updateInterface',
           origin,
         ),
         ///: END:ONLY_INCLUDE_IF
