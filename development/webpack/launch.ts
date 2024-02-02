@@ -1,19 +1,22 @@
+#!/usr/bin/env -S node --require "./node_modules/tsx/dist/preflight.cjs" --import "./node_modules/tsx/dist/loader.mjs"
+
 /**
  * @file This script optimizes build processes by conditionally forking child
  * processes based on command-line arguments. It handles memory management,
  * stdio stream creation, and process lifecycle to improve performance and
  * maintainability. Supports cross-platform execution with specific
  * considerations for Windows environments.
+ *
+ * On Linux-like systems you can skip the overhead of running `yarn` by
+ * executing this file directly, e.g., `./development/webpack/launch.ts`, or via
+ * bun or tsx.
+ *
  * @author David Murdoch <david.murdoch@consensys.net>
  */
 
 // Note: minimize non-`type` imports to decrease load time.
 import { join } from 'node:path';
-import {
-  spawn,
-  type SpawnOptions,
-  type StdioOptions,
-} from 'node:child_process';
+import { spawn, type StdioOptions } from 'node:child_process';
 import parser from 'yargs-parser';
 import type { Child, PTY, Stdio, StdName } from './types';
 
@@ -59,7 +62,7 @@ function fork(process: NodeJS.Process, file: string, argv: string[]) {
   const { connectToChild, destroy, stdio } = createOutputStreams(process);
 
   const node = process.execPath;
-  const options: SpawnOptions = { detached: true, env, stdio };
+  const options = { detached: true, env, stdio };
   spawn(node, [...nodeOptions, ...process.execArgv, file, ...argv], options)
     .once('close', destroy) // clean up if the child crashes
     .once('spawn', connectToChild);
