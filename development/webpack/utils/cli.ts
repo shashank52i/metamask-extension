@@ -1,5 +1,6 @@
 import type { Options as YargsOptions } from 'yargs';
 import yargs from 'yargs/yargs';
+import parser from 'yargs-parser';
 import { Browsers, type Manifest, uniqueSort } from './helpers';
 
 const addFeat = 'add-feature' as const;
@@ -33,22 +34,18 @@ const { loadBuildTypesConfig } = require('../../lib/build-type') as {
 };
 
 /**
- * Parses the given args from `argv` and returns whether or not the build is for
- * production.
+ * Parses the given args from `argv` and returns whether or not the requested
+ * build is a production build or not.
  *
  * @param argv
- * @param envOptions
  * @param options
- * @returns
+ * @param options.env
+ * @returns `true` if this is a production build, otherwise `false`
  */
-function getIsProduction(argv: string[], options: typeof envOptions): boolean {
-  const { env } = yargs()
-    .help(false)
-    .version(false)
-    .showHelpOnFail(false)
-    .options(options)
-    .parseSync(argv);
-  return env === 'production';
+function getIsProduction(argv: string[], { env }: typeof envOptions): boolean {
+  const options: { [k: string]: any } = {};
+  Object.entries(env).forEach(([key, env]) => (options[key] = { env }));
+  return parser(argv, options).env === 'production';
 }
 
 /**
@@ -64,8 +61,8 @@ export const parseArgv = (argv: string[]) => {
   const allBuildTypeNames = Object.keys(buildTypes);
   const allFeatureNames = Object.keys(allFeatures);
 
-  // peek ahead at the args to determine if we're in a production environment as
-  // some defaults are different for production vs development.
+  // peek ahead at the args to determine if we're in a production environment,
+  // as some defaults are different for production vs development.
   const isProduction = getIsProduction(argv, envOptions);
 
   const options = getOptions(isProduction, allBuildTypeNames, allFeatureNames);
@@ -78,33 +75,22 @@ export const parseArgv = (argv: string[]) => {
   const active = new Set<string>();
   const defaultFeaturesForBuildType = buildTypes[conf.type]?.features ?? [];
   const setActive = (f: string) => omit.includes(f) || active.add(f);
-  [defaultFeaturesForBuildType, add].forEach((a) => a.forEach(setActive));
+  [defaultFeaturesForBuildType, add].forEach((feat) => feat.forEach(setActive));
 
-  const ignore = ['$0', 'watch', 'conf', 'progress', 'stats'];
+  const ignore = new Set(['$0', 'conf', 'progress', 'stats', 'watch']);
   const cacheKey = Object.entries(args)
-    .sort(([a], [b]) => {
-      return a > b ? 1 : a < b ? -1 : 0;
-    })
-    .reduce((acc, [key, value]) => {
-      if (key.length === 1 || ignore.includes(key) || key.includes('-')) {
-        return acc;
-      }
-      acc[key] = value;
-      return acc;
-    }, {} as { [key: string]: unknown });
+    .filter(([key]) => key.length > 1 && !ignore.has(key) && !key.includes('-'))
+    .sort(([a], [b]) => a.localeCompare(b));
   return {
-    /**
-     *
-     */
-    cacheKey: JSON.stringify(cacheKey),
-    features: {
-      active,
-      all: new Set(allFeatureNames),
-    },
     // narrow the `config` type to only the options we're returning
     args: conf as {
       [key in OptionsKeys]: (typeof conf)[key];
     },
+    cacheKey: JSON.stringify(cacheKey),
+    features: {
+      active,
+      all: new Set(allFeatureNames),
+    }
   };
 };
 
