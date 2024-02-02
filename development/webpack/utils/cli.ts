@@ -142,7 +142,7 @@ function getOptions(
   buildTypes: string[],
   allFeatures: string[],
 ) {
-  const securityDesc = "If `env` is 'production', `true`, otherwise `false`";
+  const prodDefaultDesc = "If `env` is 'production', `true`, otherwise `false`";
   return {
     ...envOptions,
     watch: {
@@ -179,6 +179,14 @@ function getOptions(
       choices: ['none', 'source-map', 'hidden-source-map'] as const,
       group: 'Developer assistance:',
       type: 'string',
+    },
+    sentry: {
+      array: false,
+      default: isProduction,
+      defaultDescription: prodDefaultDesc,
+      description: 'Enables/disables Sentry Application Monitoring',
+      group: 'Developer assistance:',
+      type: 'boolean',
     },
     zip: {
       alias: 'z',
@@ -253,7 +261,7 @@ function getOptions(
       alias: 'l',
       array: false,
       default: isProduction,
-      defaultDescription: securityDesc,
+      defaultDescription: prodDefaultDesc,
       description: 'Apply LavaMoat to the build assets',
       group: 'Security:',
       type: 'boolean',
@@ -262,7 +270,7 @@ function getOptions(
       alias: 's',
       array: false,
       default: isProduction,
-      defaultDescription: securityDesc,
+      defaultDescription: prodDefaultDesc,
       description: 'Apply Snow to the build assets',
       group: 'Security:',
       type: 'boolean',

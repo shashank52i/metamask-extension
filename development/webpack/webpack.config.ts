@@ -156,7 +156,7 @@ const NAME = 'MetaMask';
 const DESCRIPTION = `MetaMask ${BROWSER} Extension`;
 // TODO: figure out what build.yml's env vars are doing and then do the merge
 // stuff. Also, fix all this crappy ENV code.
-const ENV = mergeEnv({});
+const ENV = mergeEnv({ ENABLE_SENTRY: args.sentry ? "true" : undefined });
 const envsStringified = Object.entries(ENV).reduce(
   (acc: Record<string, string>, [key, val]) => {
     acc[`${key}`] = JSON.stringify(val);
