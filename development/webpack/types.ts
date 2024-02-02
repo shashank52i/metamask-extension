@@ -26,7 +26,7 @@ export type StdName = 'stdout' | 'stderr';
  * The control interface for a child process's stdio streams.
  */
 export interface Stdio {
-  kill: () => void;
+  destroy: () => void;
   listen: (child: Child) => void;
   pty: Socket | 'pipe';
   resize: () => void;

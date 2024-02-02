@@ -108,7 +108,7 @@ function createOutputStreams(process: NodeJS.Process) {
           child.kill(signal);
         });
     },
-    destroy: () => outs.forEach((out) => out.kill()),
+    destroy: () => outs.forEach((out) => out.destroy()),
     stdio: ['ignore', outs[0].pty, outs[1].pty, ipc] as StdioOptions,
   };
 }
@@ -122,7 +122,7 @@ function createOutputStreams(process: NodeJS.Process) {
  */
 function createNonTTYStream(stream: NodeJS.WriteStream, name: StdName): Stdio {
   return {
-    kill: () => {},
+    destroy: () => {},
     listen: (child: Child) => void child[name]!.pipe(stream),
     pty: 'pipe', // let Node create the Pipes
     resize: () => {},
@@ -142,7 +142,7 @@ function createTTYStream(stream: NodeJS.WriteStream): Stdio {
   const pty: PTY = require('node-pty').open(options);
 
   return {
-    kill: () => pty.kill('SIGHUP'),
+    destroy: () => void (pty.master.destroy(), pty.slave.destroy()),
     listen: (child: Child) => void pty.master.pipe(stream),
     pty: pty.slave,
     resize: () => pty.resize(stream.columns, stream.rows),
