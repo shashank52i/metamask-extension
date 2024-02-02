@@ -68,12 +68,6 @@ if (args.browser.length > 1) {
     `The webpack build doesn't support multiple browsers yet. So sorry.`,
   );
 }
-
-if (args.manifest_version === 3) {
-  throw new Error(
-    "The webpack build doesn't support manifest_version 3 yet. So sorry.",
-  );
-}
 // #endregion temporary short circuit for unsupported build configurations
 
 const dir = join(__dirname, '../../app');
@@ -282,10 +276,23 @@ const plugins: WebpackPluginInstance[] = [
           });
 
           if (args.devtool === 'source-map') {
-            browserManifest.web_accessible_resources = [
-              'scripts/inpage.js.map',
-              'scripts/contentscript.js.map',
-            ] as any;
+            // TODO: merge with anything that might already be in web_accessible_resources
+            if (MANIFEST_VERSION === 3) {
+              browserManifest.web_accessible_resources = [
+                {
+                  resources: [
+                    'scripts/inpage.js.map',
+                    'scripts/contentscript.js.map',
+                  ],
+                  matches: ['<all_urls>'],
+                },
+              ] as any;
+            } else {
+              browserManifest.web_accessible_resources = [
+                'scripts/inpage.js.map',
+                'scripts/contentscript.js.map',
+              ] as any;
+            }
           }
           return JSON.stringify(browserManifest, null, args.minify ? 0 : 2);
         },

@@ -89,6 +89,7 @@ export const mergeEnv = (userEnv: NodeJS.ProcessEnv): NodeJS.ProcessEnv => {
   env.METAMASK_BUILD_ICON = 'data:image:./images/icon-64.png';
   env.METAMASK_BUILD_APP_ID = 'io.metamask';
   // env.IN_TEST = "0";
+  env.APPLY_LAVAMOAT = false as any as string; // metamask is drunk
 
   const finalEnv = { ...userEnv, ...env };
 
