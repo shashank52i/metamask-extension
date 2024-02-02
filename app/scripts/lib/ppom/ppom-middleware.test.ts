@@ -130,7 +130,7 @@ describe('PPOMMiddleware', () => {
     expect(
       (req.securityAlertResponse as unknown as SecurityAlertResponse)
         .result_type,
-    ).toStrictEqual(BlockaidResultType.Errored);
+    ).toStrictEqual(BlockaidResultType.Error);
   });
 
   it('should call next method when ppomController.usePPOM completes', async () => {

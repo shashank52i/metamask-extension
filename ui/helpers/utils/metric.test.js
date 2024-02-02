@@ -100,14 +100,13 @@ describe('getBlockaidMetricsProps', () => {
   });
 
   it('includes "security_alert_error" ui_customization when type is an error', () => {
-    const securityAlertResponse = {
-      result_type: BlockaidResultType.Error,
-      reason: 'error: error message',
-      providerRequestsCount: {},
-      features: [],
-    };
-
-    const result = getBlockaidMetricsParams(securityAlertResponse);
+    const result = getBlockaidMetricsProps({
+      securityAlertResponse: {
+        ...securityAlertResponse,
+        result_type: BlockaidResultType.Error,
+        reason: 'error: error message',
+      },
+    });
     expect(result).toStrictEqual({
       ui_customizations: ['security_alert_error'],
       security_alert_response: BlockaidResultType.Error,

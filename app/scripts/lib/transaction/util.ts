@@ -115,11 +115,10 @@ export async function addTransaction(
           try {
             return ppom.validateJsonRpc(ppomRequest);
           } catch (error) {
-            // send to sentry
             captureException(error);
             return {
               reason: error,
-              result_type: BlockaidResultType.Errored,
+              result_type: BlockaidResultType.Error,
             };
           }
         },

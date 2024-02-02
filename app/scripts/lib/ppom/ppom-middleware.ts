@@ -68,12 +68,11 @@ export function createPPOMMiddleware(
             try {
               return ppom.validateJsonRpc(req);
             } catch (error) {
-              // send to sentry
               captureException(error);
               const errorObject = error as unknown as Error;
               return {
                 reason: `${errorObject.name}: ${errorObject.message}`,
-                result_type: BlockaidResultType.Errored,
+                result_type: BlockaidResultType.Error,
               };
             }
           },

@@ -55,11 +55,11 @@ export enum BlockaidResultType {
   Malicious = 'Malicious',
   Warning = 'Warning',
   Benign = 'Benign',
-  Error = 'Error',
-
   // MetaMask defined result types
   Failed = 'Failed',
   NotApplicable = 'NotApplicable',
+  /* eslint-disable-next-line @typescript-eslint/no-shadow */
+  Error = 'Error',
 }
 
 /**
