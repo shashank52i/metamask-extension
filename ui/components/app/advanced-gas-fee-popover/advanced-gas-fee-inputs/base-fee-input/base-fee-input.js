@@ -19,6 +19,7 @@ import FormField from '../../../../ui/form-field';
 import { useAdvancedGasFeePopoverContext } from '../../context';
 import AdvancedGasFeeInputSubtext from '../../advanced-gas-fee-input-subtext';
 import { decGWEIToHexWEI } from '../../../../../../shared/modules/conversion.utils';
+import { Numeric } from '../../../../../../shared/modules/Numeric';
 
 const validateBaseFee = (value, gasFeeEstimates, maxPriorityFeePerGas) => {
   if (bnGreaterThan(maxPriorityFeePerGas, value)) {
@@ -81,7 +82,7 @@ const BaseFeeInput = () => {
 
   const updateBaseFee = useCallback(
     (value) => {
-      setBaseFee(value);
+      setBaseFee(new Numeric(value, 10)?.toString());
     },
     [setBaseFee],
   );

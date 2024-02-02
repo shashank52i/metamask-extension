@@ -19,6 +19,7 @@ import { bnGreaterThan, bnLessThan } from '../../../../../helpers/utils/util';
 import { useAdvancedGasFeePopoverContext } from '../../context';
 import AdvancedGasFeeInputSubtext from '../../advanced-gas-fee-input-subtext';
 import { decGWEIToHexWEI } from '../../../../../../shared/modules/conversion.utils';
+import { Numeric } from '../../../../../../shared/modules/Numeric';
 
 const validatePriorityFee = (value, gasFeeEstimates) => {
   if (value < 0) {
@@ -76,7 +77,7 @@ const PriorityFeeInput = () => {
   );
 
   const updatePriorityFee = (value) => {
-    setPriorityFee(value);
+    setPriorityFee(new Numeric(value, 10)?.toString());
   };
 
   useEffect(() => {
