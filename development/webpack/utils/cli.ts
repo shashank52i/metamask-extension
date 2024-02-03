@@ -1,7 +1,7 @@
 import type { Options as YargsOptions } from 'yargs';
 import yargs from 'yargs/yargs';
 import parser from 'yargs-parser';
-import { Browsers, type Manifest, uniqueSort } from './helpers';
+import { Browsers, type Manifest, uniqueSort, toOrange } from './helpers';
 
 const addFeat = 'add-feature' as const;
 const omitFeat = 'omit-feature' as const;
@@ -17,7 +17,7 @@ const envOptions = {
     description:
       'Enables/disables production optimizations or development hints',
     choices: ['development', 'production'] as const,
-    group: 'Build options:',
+    group: toOrange("Build options:"),
   },
   // `as const` makes it easier for developers to see the values of the type
   // when hovering over it in their IDE. `satisfies Options` enables type
@@ -105,7 +105,7 @@ function getCli<T extends YargsOptionsMap = Options>(options: T, name: string) {
     // Ensure unrecognized commands/options are reported as errors.
     .strict()
     // use the scriptName in `--help` output
-    // .scriptName(name)
+    .scriptName(name)
     // wrap output at a maximum of 120 characters or `process.stdout.columns`
     .wrap(Math.min(120, process.stdout.columns))
     // enable the `--config` command, which allows the user to specify a custom
@@ -125,10 +125,15 @@ function getCli<T extends YargsOptionsMap = Options>(options: T, name: string) {
       '$0 --env development --browser brave --browser chrome --zip',
       'Builds the extension for development for Chrome & Brave; generate zip files for both',
     )
-    .example(
-      '$0 completion',
-      `Generates a bash completion script for the \`${name}\` command`,
-    )
+     // TODO: enable completion once https://github.com/yargs/yargs/issues/2387 is fixed.
+    // .example(
+    //   '$0 completion',
+    //   `Generates a bash completion script for the \`${name}\` command`,
+    // )
+    .updateStrings({
+      "Options:": toOrange("Options:"),
+      "Examples:": toOrange("Examples:")
+    })
     .options(options);
   return cli;
 }
@@ -148,7 +153,7 @@ function getOptions(
       array: false,
       default: false,
       description: 'Build then watch for files changes',
-      group: 'Developer assistance:',
+      group: toOrange("Developer assistance:"),
       type: 'boolean',
     },
     cache: {
@@ -156,7 +161,7 @@ function getOptions(
       array: false,
       default: true,
       description: 'Cache build for faster rebuilds',
-      group: 'Developer assistance:',
+      group: toOrange("Developer assistance:"),
       type: 'boolean',
     },
     progress: {
@@ -164,7 +169,7 @@ function getOptions(
       array: false,
       default: true,
       description: 'Show build progress',
-      group: 'Developer assistance:',
+      group: toOrange("Developer assistance:"),
       type: 'boolean',
     },
     devtool: {
@@ -175,7 +180,7 @@ function getOptions(
         "If `env` is 'production', 'hidden-source-map', otherwise 'source-map'",
       description: 'Sourcemap type to generate',
       choices: ['none', 'source-map', 'hidden-source-map'] as const,
-      group: 'Developer assistance:',
+      group: toOrange("Developer assistance:"),
       type: 'string',
     },
     sentry: {
@@ -183,7 +188,7 @@ function getOptions(
       default: isProduction,
       defaultDescription: prodDefaultDesc,
       description: 'Enables/disables Sentry Application Monitoring',
-      group: 'Developer assistance:',
+      group: toOrange("Developer assistance:"),
       type: 'boolean',
     },
     zip: {
@@ -191,7 +196,7 @@ function getOptions(
       array: false,
       default: false,
       description: 'Generate a zip file of the build',
-      group: 'Build options:',
+      group: toOrange("Build options:"),
       type: 'boolean',
     },
     minify: {
@@ -200,7 +205,7 @@ function getOptions(
       default: isProduction,
       defaultDescription: "If `env` is 'production', `true`, otherwise `false`",
       description: 'Minify the output',
-      group: 'Build options:',
+      group: toOrange("Build options:"),
       type: 'boolean',
     },
     browser: {
@@ -214,7 +219,7 @@ function getOptions(
       },
       default: 'chrome',
       description: 'Browsers to build for',
-      group: 'Build options:',
+      group: toOrange("Build options:"),
       type: 'string',
     },
     manifest_version: {
@@ -223,7 +228,7 @@ function getOptions(
       choices: [2, 3] as Manifest['manifest_version'][],
       default: 2 as Manifest['manifest_version'],
       description: "Changes manifest.json format to the given version's schema",
-      group: 'Build options:',
+      group: toOrange("Build options:"),
       type: 'number',
     },
     type: {
@@ -232,7 +237,7 @@ function getOptions(
       choices: ['none', ...buildTypes],
       default: 'main' as const,
       description: 'Configure features for the build (main, beta, etc)',
-      group: 'Build options:',
+      group: toOrange("Build options:"),
       type: 'string',
     },
     [addFeat]: {
@@ -242,7 +247,7 @@ function getOptions(
       coerce: uniqueSort,
       default: [] as typeof allFeatures,
       description: 'Add features not be included in the selected build `type`',
-      group: 'Build options:',
+      group: toOrange("Build options:"),
       type: 'string',
     },
     [omitFeat]: {
@@ -252,7 +257,7 @@ function getOptions(
       coerce: uniqueSort,
       default: [] as typeof allFeatures,
       description: 'Omit features included in the selected build `type`',
-      group: 'Build options:',
+      group: toOrange("Build options:"),
       type: 'string',
     },
     lavamoat: {
@@ -261,7 +266,7 @@ function getOptions(
       default: isProduction,
       defaultDescription: prodDefaultDesc,
       description: 'Apply LavaMoat to the build assets',
-      group: 'Security:',
+      group: toOrange("Security:"),
       type: 'boolean',
     },
     snow: {
@@ -270,21 +275,21 @@ function getOptions(
       default: isProduction,
       defaultDescription: prodDefaultDesc,
       description: 'Apply Snow to the build assets',
-      group: 'Security:',
+      group: toOrange("Security:"),
       type: 'boolean',
     },
     'dry-run': {
       array: false,
       default: false,
       description: 'Outputs the config without building',
-      group: 'Options:',
+      group: toOrange("Options:"),
       type: 'boolean',
     },
     stats: {
       array: false,
       default: false,
       description: 'Display build stats after building',
-      group: 'Options:',
+      group: toOrange("Options:"),
       type: 'boolean',
     },
   } as const satisfies YargsOptionsMap;

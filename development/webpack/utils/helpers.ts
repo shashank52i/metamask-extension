@@ -344,7 +344,7 @@ export function getMinimizers() {
 }
 
 const colors = isatty(process.stderr.fd) ? process.stderr.getColorDepth() : 1;
-const { toGreen, toOrange } = (() => {
+export const { toGreen, toOrange } = (() => {
   const colorize = (code: string, str: string) => `\x1b[${code}m${str}\x1b[0m`;
   const echo = (str: string) => str;
   // 24: metamask orange, 8: close to metamask orange, 4: yellow :-(
