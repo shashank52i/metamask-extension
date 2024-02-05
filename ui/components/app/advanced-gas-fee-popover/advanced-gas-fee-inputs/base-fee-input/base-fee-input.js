@@ -83,7 +83,6 @@ const BaseFeeInput = () => {
   const updateBaseFee = useCallback(
     (value) => {
       setBaseFee(new Numeric(value, 10)?.toString());
-      // setBaseFee(value);
     },
     [setBaseFee],
   );
