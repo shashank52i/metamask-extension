@@ -18,6 +18,7 @@ import {
   ///: END:ONLY_INCLUDE_IF
   getSelectedAccount,
   getPreferences,
+  getIsMainnet,
 } from '../../../selectors';
 import {
   getNativeCurrency,
@@ -62,6 +63,7 @@ const AssetList = ({ onClickAsset }) => {
   const nativeCurrency = useSelector(getNativeCurrency);
   const showFiat = useSelector(getShouldShowFiat);
   const chainId = useSelector(getCurrentChainId);
+  const isMainnet = useSelector(getIsMainnet);
   const { useNativeCurrencyAsPrimaryCurrency } = useSelector(getPreferences);
   const { ticker, type } = useSelector(getProviderConfig);
   const isOriginalNativeSymbol = useIsOriginalNativeTokenSymbol(
@@ -211,6 +213,7 @@ const AssetList = ({ onClickAsset }) => {
         tokenImage={balanceIsLoading ? null : primaryTokenImage}
         isOriginalTokenSymbol={isOriginalNativeSymbol}
         isNativeCurrency
+        isStakeable={isMainnet}
       />
       <TokenList
         tokens={tokensWithBalances}
