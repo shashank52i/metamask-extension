@@ -7,7 +7,6 @@ import {
   PriorityLevels,
 } from '../../../../../../shared/constants/gas';
 import { PRIMARY } from '../../../../../helpers/constants/common';
-import { bnGreaterThan, bnLessThan } from '../../../../../helpers/utils/util';
 import { getAdvancedGasFeeValues } from '../../../../../selectors';
 import { useGasFeeContext } from '../../../../../contexts/gasFee';
 import { useI18nContext } from '../../../../../hooks/useI18nContext';
@@ -22,20 +21,21 @@ import { decGWEIToHexWEI } from '../../../../../../shared/modules/conversion.uti
 import { Numeric } from '../../../../../../shared/modules/Numeric';
 
 const validateBaseFee = (value, gasFeeEstimates, maxPriorityFeePerGas) => {
-  if (bnGreaterThan(maxPriorityFeePerGas, value)) {
+  const baseFeeValue = new Numeric(value, 10);
+  if (new Numeric(maxPriorityFeePerGas, 10).greaterThan(baseFeeValue)) {
     return 'editGasMaxBaseFeeGWEIImbalance';
   }
   if (
     gasFeeEstimates?.low &&
-    bnLessThan(value, gasFeeEstimates.low.suggestedMaxFeePerGas)
+    baseFeeValue.lessThan(gasFeeEstimates.low.suggestedMaxFeePerGas, 10)
   ) {
     return 'editGasMaxBaseFeeLow';
   }
   if (
     gasFeeEstimates?.high &&
-    bnGreaterThan(
-      value,
+    baseFeeValue.greaterThan(
       gasFeeEstimates.high.suggestedMaxFeePerGas * HIGH_FEE_WARNING_MULTIPLIER,
+      10,
     )
   ) {
     return 'editGasMaxBaseFeeHigh';
@@ -83,6 +83,7 @@ const BaseFeeInput = () => {
   const updateBaseFee = useCallback(
     (value) => {
       setBaseFee(new Numeric(value, 10)?.toString());
+      // setBaseFee(value);
     },
     [setBaseFee],
   );

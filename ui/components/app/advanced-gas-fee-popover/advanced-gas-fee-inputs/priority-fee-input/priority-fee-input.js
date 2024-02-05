@@ -14,7 +14,6 @@ import { useI18nContext } from '../../../../../hooks/useI18nContext';
 import { useUserPreferencedCurrency } from '../../../../../hooks/useUserPreferencedCurrency';
 import FormField from '../../../../ui/form-field';
 import Box from '../../../../ui/box';
-import { bnGreaterThan, bnLessThan } from '../../../../../helpers/utils/util';
 
 import { useAdvancedGasFeePopoverContext } from '../../context';
 import AdvancedGasFeeInputSubtext from '../../advanced-gas-fee-input-subtext';
@@ -22,21 +21,25 @@ import { decGWEIToHexWEI } from '../../../../../../shared/modules/conversion.uti
 import { Numeric } from '../../../../../../shared/modules/Numeric';
 
 const validatePriorityFee = (value, gasFeeEstimates) => {
-  if (value < 0) {
+  const priorityFeeValue = new Numeric(value, 10);
+  if (priorityFeeValue.lessThan(0, 10)) {
     return 'editGasMaxPriorityFeeBelowMinimumV2';
   }
   if (
     gasFeeEstimates?.low &&
-    bnLessThan(value, gasFeeEstimates.low.suggestedMaxPriorityFeePerGas)
+    priorityFeeValue.lessThan(
+      gasFeeEstimates.low.suggestedMaxPriorityFeePerGas,
+      10,
+    )
   ) {
     return 'editGasMaxPriorityFeeLowV2';
   }
   if (
     gasFeeEstimates?.high &&
-    bnGreaterThan(
-      value,
+    priorityFeeValue.greaterThan(
       gasFeeEstimates.high.suggestedMaxPriorityFeePerGas *
         HIGH_FEE_WARNING_MULTIPLIER,
+      10,
     )
   ) {
     return 'editGasMaxPriorityFeeHighV2';
