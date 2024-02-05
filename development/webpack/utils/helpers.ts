@@ -348,7 +348,7 @@ export const { toGreen, toOrange } = (() => {
   const colorize = (code: string, str: string) => `\x1b[${code}m${str}\x1b[0m`;
   const echo = (str: string) => str;
   // 24: metamask orange, 8: close to metamask orange, 4: yellow :-(
-  const mm = { 24: '1;38;2;246;133;27', 8: '1;38;5;208', 4: '1;33' };
+  const mm = { 24: '1;38;2;255;92;22', 8: '1;38;5;208', 4: '1;33' };
   return {
     toGreen: colors > 1 ? colorize.bind(null, '1;32') : echo,
     toOrange: colors > 1 ? colorize.bind(null, mm[colors as 24 | 8 | 4]) : echo,
