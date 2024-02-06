@@ -192,7 +192,7 @@ describe('BaseFeeInput', () => {
 
       fireEvent.change(input, { target: { value: LOW_BASE_FEE } });
 
-      expect(input.value).toBe('0.000000001');
+      expect(input.value).toBe('1e-9');
     });
   });
 });

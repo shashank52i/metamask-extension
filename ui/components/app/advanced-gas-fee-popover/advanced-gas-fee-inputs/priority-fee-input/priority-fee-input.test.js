@@ -178,7 +178,7 @@ describe('PriorityfeeInput', () => {
 
       fireEvent.change(input, { target: { value: LOW_PRIORITY_FEE } });
 
-      expect(input.value).toBe('0.000000001');
+      expect(input.value).toBe('1e-9');
     });
   });
 });

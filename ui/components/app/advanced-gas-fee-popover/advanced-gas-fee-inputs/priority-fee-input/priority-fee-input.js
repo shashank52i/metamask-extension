@@ -52,8 +52,16 @@ const PriorityFeeInput = () => {
   const advancedGasFeeValues = useSelector(getAdvancedGasFeeValues);
   const { gasLimit, setErrorValue, setMaxPriorityFeePerGas } =
     useAdvancedGasFeePopoverContext();
-  const { editGasMode, estimateUsed, gasFeeEstimates, maxPriorityFeePerGas } =
-    useGasFeeContext();
+  const {
+    editGasMode,
+    estimateUsed,
+    gasFeeEstimates,
+    maxPriorityFeePerGas: maxPriorityFeePerGasNumber,
+  } = useGasFeeContext();
+  const maxPriorityFeePerGas = new Numeric(
+    maxPriorityFeePerGasNumber,
+    10,
+  ).toString();
   const {
     latestPriorityFeeRange,
     historicalPriorityFeeRange,
@@ -69,7 +77,7 @@ const PriorityFeeInput = () => {
     ) {
       return advancedGasFeeValues.priorityFee;
     }
-    return new Numeric(maxPriorityFeePerGas, 10).toString();
+    return maxPriorityFeePerGas;
   });
 
   const { currency, numberOfDecimals } = useUserPreferencedCurrency(PRIMARY);
@@ -80,7 +88,7 @@ const PriorityFeeInput = () => {
   );
 
   const updatePriorityFee = (value) => {
-    setPriorityFee(new Numeric(value, 10)?.toString());
+    setPriorityFee(value);
   };
 
   useEffect(() => {
