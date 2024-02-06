@@ -495,6 +495,28 @@ export default class MetamaskController extends EventEmitter {
       }),
     });
 
+    // If the selected network client for the metamask domain is not set, set it to the current network client
+    if (
+      !this.selectedNetworkController.getNetworkClientIdForDomain('metamask')
+    ) {
+      this.selectedNetworkController.setNetworkClientIdForMetamask(
+        this.networkController.state.selectedNetworkClientId,
+      );
+    }
+
+    // If the perDomainNetwork feature flag is enabled, use metamask origin provider and block tracker
+    // as the proxy passed to the controllers instantiated below
+    let networkClient;
+    if (this.selectedNetworkController.state.perDomainNetwork) {
+      networkClient =
+        this.selectedNetworkController.getProviderAndBlockTracker('metamask');
+    } else {
+      networkClient = this.networkController.getProviderAndBlockTracker();
+    }
+
+    this.provider = networkClient.provider;
+    this.blockTracker = networkClient.blockTracker;
+
     this.tokenListController = new TokenListController({
       chainId: this.networkController.state.providerConfig.chainId,
       preventPollingOnNetworkRestart: initState.TokenListController
@@ -4630,25 +4652,40 @@ export default class MetamaskController extends EventEmitter {
     // append selectedNetworkClientId to each request
     engine.push(createSelectedNetworkMiddleware(this.controllerMessenger));
 
-    const { selectedNetworkClientId } = this.networkController.state;
+    // only use proxyClient from selectedNetworkController when the following are all true:
+    // This also includes setting default value for selectedNetworkClientId for the particular domain
+    // 1. selectedNetworkClientIdForDomain has not been set
+    // 2. feature flag for perDomainNetwork is on
+    // 3. there exists a permission (any permission) for the given domain
+    // Why 3? because we end up calling setupProviderEngine here regardless of the in-page provider having actually tried to use metamask. What this really ends up meaning is that
+    // without doing #3, we will save a record for every single domain that the inpage provider is injected for (iframes, frames, every tab, way too much). What we really want is
+    // to only maintain records for domains that have actually tried using metamask. As such, we use 'have they set a permission before' as a proxy for this.
+    let proxyClient;
+    const hasPermission =
+      this.permissionController.getPermissions(origin) !== undefined;
+    if (
+      this.selectedNetworkController.state.perDomainNetwork &&
+      hasPermission
+    ) {
+      // this should be handled inside selectedNetworkController
+      const selectedNetworkClientIdForDomain =
+        this.selectedNetworkController.getNetworkClientIdForDomain(origin);
 
-    const selectedNetworkClientIdForDomain =
-      this.selectedNetworkController.getNetworkClientIdForDomain(origin);
-
-    // Not sure that this will happen anymore
-    if (selectedNetworkClientIdForDomain === undefined) {
-      this.selectedNetworkController.setNetworkClientIdForDomain(
-        origin,
-        selectedNetworkClientId,
-      );
-    }
-
-    let proxyProviderForDomain = provider;
-    if (this.preferencesController.getUseRequestQueue()) {
-      proxyProviderForDomain =
-        this.selectedNetworkController.getProviderAndBlockTracker(
+      if (selectedNetworkClientIdForDomain === undefined) {
+        this.selectedNetworkController.setNetworkClientIdForDomain(
           origin,
-        ).provider;
+          this.networkController.state.selectedNetworkClientId,
+        );
+      }
+      // end of things that belong in selectedNetworkController
+
+      proxyClient =
+        this.selectedNetworkController.getProviderAndBlockTracker(origin);
+    } else {
+      proxyClient = {
+        provider: this.provider,
+        blockTracker: this.blockTracker,
+      };
     }
 
     const requestQueueMiddleware = createQueuedRequestMiddleware({
@@ -4661,7 +4698,7 @@ export default class MetamaskController extends EventEmitter {
     engine.push(requestQueueMiddleware);
 
     // create filter polyfill middleware
-    const filterMiddleware = createFilterMiddleware({ provider, blockTracker });
+    const filterMiddleware = createFilterMiddleware(proxyClient);
 
     // create subscription polyfill middleware
     const subscriptionManager = createSubscriptionManager({
@@ -4951,7 +4988,7 @@ export default class MetamaskController extends EventEmitter {
 
     engine.push(this.metamaskMiddleware);
 
-    engine.push(providerAsMiddleware(proxyProviderForDomain));
+    engine.push(providerAsMiddleware(proxyClient.provider));
 
     return engine;
   }
