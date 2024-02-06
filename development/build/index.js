@@ -43,9 +43,9 @@ require('@babel/core');
 // ESLint-related
 require('@babel/eslint-parser');
 require('@babel/eslint-plugin');
-// require('@metamask/eslint-config');
-// require('@metamask/eslint-config-nodejs');
-// require('@typescript-eslint/parser');
+require('@metamask/eslint-config');
+require('@metamask/eslint-config-nodejs');
+require('@typescript-eslint/parser');
 // require('eslint');
 // require('eslint-config-prettier');
 // require('eslint-import-resolver-node');
