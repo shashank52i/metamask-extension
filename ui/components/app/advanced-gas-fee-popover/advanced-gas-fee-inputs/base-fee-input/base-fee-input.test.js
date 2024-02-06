@@ -185,6 +185,7 @@ describe('BaseFeeInput', () => {
 
       expect(input.value).toBe('1');
     });
+
     it('handles low numbers', () => {
       const { getByTestId } = render(<BaseFeeInput />);
       const input = getByTestId('base-fee-input');

@@ -171,6 +171,7 @@ describe('PriorityfeeInput', () => {
 
       expect(input.value).toBe('1');
     });
+
     it('handles low numbers', () => {
       const { getByTestId } = render(<PriorityfeeInput />);
       const input = getByTestId('priority-fee-input');
