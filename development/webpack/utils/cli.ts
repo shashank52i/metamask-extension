@@ -50,7 +50,7 @@ const { loadBuildTypesConfig } = require('../../lib/build-type') as {
  */
 function getIsProduction(argv: string[], { env }: typeof envOptions): boolean {
   const options: { [k: string]: any } = {};
-  Object.entries(env).forEach(([key, env]) => (options[key] = { env }));
+  Object.entries(env).forEach(([key, val]) => (options[key] = { env: val }));
   return parser(argv, options).env === 'production';
 }
 
@@ -86,7 +86,7 @@ export const parseArgv = (argv: string[]) => {
   const ignore = new Set(['$0', 'conf', 'progress', 'stats', 'watch']);
   const cacheKey = Object.entries(args)
     .filter(([key]) => key.length > 1 && !ignore.has(key) && !key.includes('-'))
-    .sort(([a], [b]) => a.localeCompare(b));
+    .sort(([x], [y]) => x.localeCompare(y));
   return {
     // narrow the `config` type to only the options we're returning
     args: conf as { [key in OptionsKeys]: (typeof conf)[key] },
@@ -101,9 +101,7 @@ export const parseArgv = (argv: string[]) => {
 /**
  * Gets a yargs instance for parsing CLI arguments.
  *
- * @param argv
  * @param options
- * @param command
  * @param name
  */
 function getCli<T extends YargsOptionsMap = Options>(options: T, name: string) {

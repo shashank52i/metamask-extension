@@ -105,7 +105,7 @@ export const mergeEnv = (userEnv: NodeJS.ProcessEnv): NodeJS.ProcessEnv => {
 
   // validate INFURA_KEY
   if (INFURA_PROJECT_ID) {
-    if (!/^[a-f0-9]{32}$/.test(INFURA_PROJECT_ID)) {
+    if (!/^[a-f0-9]{32}$/u.test(INFURA_PROJECT_ID)) {
       throw new Error(
         'INFURA_PROJECT_ID must be 32 characters long and contain only the characters a-f0-9',
       );
@@ -227,6 +227,28 @@ export function collectEntries(manifest: Manifest, appRoot: string) {
   return { entry, canBeChunked };
 }
 
+export type DetailedErrorMessage = {
+  message: string;
+  reason: string;
+  solutions: string[];
+  context?: string;
+};
+
+export class DetailedError extends Error {
+  constructor({ message, reason, solutions, context }: DetailedErrorMessage) {
+    const redMessage = `${message}
+Reason: ${reason}
+
+Suggested Action${solutions.length === 1 ? '' : 's'}:
+${solutions.map((solution) => ` •  ${solution}`).join('\n')}
+${context ? `\n ${context}` : ``}
+`;
+    super(redMessage);
+    this.message = redMessage;
+    this.name = '';
+  }
+}
+
 /**
  * @param filename
  * @param appRoot
@@ -254,28 +276,6 @@ function assertValidEntryFileName(filename: string, appRoot: string) {
     solutions,
     context,
   });
-}
-
-export type DetailedErrorMessage = {
-  message: string;
-  reason: string;
-  solutions: string[];
-  context?: string;
-};
-
-export class DetailedError extends Error {
-  constructor({ message, reason, solutions, context }: DetailedErrorMessage) {
-    const redMessage = `${message}
-Reason: ${reason}
-
-Suggested Action${solutions.length === 1 ? '' : 's'}:
-${solutions.map((solution) => ` •  ${solution}`).join('\n')}
-${context ? `\n ${context}` : ``}
-`;
-    super(redMessage);
-    this.message = redMessage;
-    this.name = '';
-  }
 }
 
 /**

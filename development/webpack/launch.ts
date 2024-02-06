@@ -123,10 +123,10 @@ function createOutputStreams(process: NodeJS.Process) {
  */
 function createNonTTYStream(stream: NodeJS.WriteStream, name: StdName): Stdio {
   return {
-    destroy: () => {},
+    destroy: () => undefined,
     listen: (child: Child) => void child[name]!.pipe(stream),
     pty: 'pipe', // let Node create the Pipes
-    resize: () => {},
+    resize: () => undefined,
     unref: (child: Child) => void child[name]!.unref(),
   };
 }
@@ -158,12 +158,12 @@ function createTTYStream(stream: NodeJS.WriteStream): Stdio {
  *
  * Once the child process is unref'd, the parent process may exit on its own.
  *
- * @param child - The child process to listen to
  * @param process - The parent process, like `globalThis.process`
+ * @param child - The child process to listen to
  */
 function listenForShutdownSignal(process: NodeJS.Process, child: Child) {
   // exit gracefully when the child signals the parent via `SIGUSR2`
-  if (child.channel == null || child.channel === undefined) {
+  if (child.channel === null || child.channel === undefined) {
     process.on('SIGUSR2', () => child.unref());
   } else {
     child.channel.unref();

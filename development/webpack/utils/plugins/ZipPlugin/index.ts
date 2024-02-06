@@ -96,12 +96,11 @@ export class ZipPlugin {
       const compressionOptions: DeflateOptions = { level: this.options.level };
 
       for (const assetName in assets) {
+        if (!Object.prototype.hasOwnProperty.call(assets, assetName)) {
+          continue;
+        }
         if (errored) {
           return;
-        }
-
-        if (!assets.hasOwnProperty(assetName)) {
-          continue;
         }
 
         const extName = path.extname(assetName);

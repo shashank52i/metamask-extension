@@ -1,17 +1,16 @@
-import webpack from 'webpack';
+import { webpack } from 'webpack';
 import type WebpackDevServerType from 'webpack-dev-server';
 import { noop, logStats, __HMR_READY__ } from './utils/helpers';
 import config from './webpack.config.js';
 
 // disable browserslist stats as it needlessly traverses the filesystem multiple
 // times looking for a stats file that doesn't exist.
-require('browserslist/node.js').getStat = noop;
+require('browserslist/node').getStat = noop;
 
 /**
  * Builds the extension
  *
- * @returns a Promise that resolves when the build is complete, but before
- * caching has been persisted. In watch mode, the Promise never resolves.
+ * @param onComplete
  */
 export function build(onComplete: () => void = noop) {
   const isDevelopment = config.mode === 'development';
