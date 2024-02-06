@@ -1,29 +1,26 @@
 import { readFileSync, readdirSync } from 'node:fs';
 import { parse, join, relative, sep } from 'node:path';
 import type zlib from 'node:zlib';
-import process from 'node:process';
-import { isatty } from 'node:tty';
-import { SemVerVersion, isValidSemVerVersion } from '@metamask/utils';
 import { merge } from 'lodash';
-import chalk from 'chalk';
-import { Chunk, type EntryObject, type Stats, version } from 'webpack';
+import { version } from 'webpack';
+import type { Chunk, EntryObject, Stats, Configuration } from 'webpack';
 import type TerserPluginType from 'terser-webpack-plugin';
 
 export type Manifest = chrome.runtime.Manifest;
 export type ManifestV2 = chrome.runtime.ManifestV2;
 export type ManifestV3 = chrome.runtime.ManifestV3;
 
-/**
- * Target browsers
- */
-export const Browsers = ['brave', 'chrome', 'firefox', 'opera'] as const;
-export type Browser = (typeof Browsers)[number];
-
 // HMR (Hot Module Reloading) can't be used until all circular dependencies in
 // the codebase are removed
 // See: https://github.com/MetaMask/metamask-extension/issues/22450
 // TODO: remove this variable when HMR is ready.
 export const __HMR_READY__ = false;
+
+/**
+ * Target browsers
+ */
+export const Browsers = ['brave', 'chrome', 'firefox', 'opera'] as const;
+export type Browser = (typeof Browsers)[number];
 
 const slash = `(?:\\${sep})?`;
 /**
@@ -45,13 +42,18 @@ export const noop = () => undefined;
  * @returns Returns the current version of MetaMask as specified in package.json
  * @throws Throws an error if the version is not a valid semantic version.
  */
-export const getMetaMaskVersion = (): SemVerVersion => {
+export const getMetaMaskVersion = (): string => {
   const { version } = require('../../../package.json');
-  if (isValidSemVerVersion(version)) {
-    return version as SemVerVersion;
+  // RegEx from https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
+  if (
+    /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/u.test(
+      version,
+    )
+  ) {
+    return version as string;
   }
   throw new Error(
-    `Couldn't run webpack. Invalid \`version\` found in \`package.json\`. Expected a valid semantic version (https://semver.org/) but got "${version}".`,
+    `Invalid \`version\` found in \`package.json\`. Expected a valid semantic version (https://semver.org/) but got "${version}".`,
   );
 };
 
@@ -116,7 +118,7 @@ export const mergeEnv = (userEnv: NodeJS.ProcessEnv): NodeJS.ProcessEnv => {
 export type ManifestOptions = {
   env: 'development' | 'production';
   browser: Browser;
-  version: SemVerVersion;
+  version: string;
   name: string;
   description: string;
 };
@@ -153,36 +155,37 @@ export const generateManifest = (
  * Collects all entry files for use with webpack.
  *
  * @param manifest - Base manifest file
- * @param dir - Absolute directory to search for entry files listed in the base
- * manifest
+ * @param appRoot - Absolute directory to search for entry files listed in the
+ * base manifest
  * @returns an `entry` object containing html and JS entry points for use with
  * webpack, and an array, `manifestScripts`, list of filepaths of all scripts
  * that were added to it.
  */
-export function combineEntriesFromManifestAndDir(
-  manifest: Manifest,
-  dir: string,
-) {
+export function collectEntries(manifest: Manifest, appRoot: string) {
   const entry: EntryObject = {};
+  /**
+   * Scripts that must be self-contained and not split into chunks.
+   */
   const selfContainedScripts: Set<string> = new Set([
     // Snow shouldn't be chunked
     'snow.prod',
     'use-snow',
   ]);
 
-  function addManifestScript(filename: string | undefined) {
+  function addManifestScript(filename?: string) {
     if (filename) {
       selfContainedScripts.add(filename);
       entry[filename] = {
         chunkLoading: false,
         filename, // output filename
-        import: join(dir, filename), // the path to the file to use as an entry
+        import: join(appRoot, filename), // the path to the file to use as an entry
       };
     }
   }
-  function addHtml(filename: string | undefined) {
+
+  function addHtml(filename?: string) {
     if (filename) {
-      entry[parse(filename).name] = join(dir, filename);
+      entry[parse(filename).name] = join(appRoot, filename);
     }
   }
 
@@ -202,11 +205,11 @@ export function combineEntriesFromManifestAndDir(
     );
   }
 
-  for (const file of readdirSync(dir)) {
+  for (const filename of readdirSync(appRoot)) {
     // ignore non-htm/html files
-    if (/\.html?$/iu.test(file)) {
-      assertValidEntryFileName(file, dir);
-      addHtml(file);
+    if (/\.html?$/iu.test(filename)) {
+      assertValidEntryFileName(filename, appRoot);
+      addHtml(filename);
     }
   }
 
@@ -224,57 +227,59 @@ export function combineEntriesFromManifestAndDir(
   return { entry, canBeChunked };
 }
 
-function assertValidEntryFileName(file: string, dir: string) {
-  if (!file.startsWith('_')) {
+/**
+ * @param filename
+ * @param appRoot
+ * @throws Throws a `DetailedError` if the file is an invalid entrypoint
+ * filename (a file starting with "_")
+ */
+function assertValidEntryFileName(filename: string, appRoot: string) {
+  if (!filename.startsWith('_')) {
     return;
   }
 
+  const relativeFile = relative(process.cwd(), join(appRoot, filename));
+  const message = `Invalid Entrypoint Filename Detected\nPath: ${relativeFile}`;
+  const reason = `Filenames at the root of the extension directory starting with "_" are reserved for use by the browser.`;
+  const newFile = filename.slice(1);
+  const solutions = [
+    `Rename this file to remove the underscore, e.g., '${filename}' to '${newFile}'`,
+    `Move this file to a subdirectory and, if necessary, add it manually to the build 😱`,
+  ];
+  const context = `This file was included in the build automatically by our build script, which adds all HTML files at the root of '${appRoot}'.`;
+
   throw new DetailedError({
-    problem: chalk`{red.inverse Invalid Filename Detected}\nPath: {bold.white.dim ${relative(
-      process.cwd(),
-      join(dir, file),
-    )}}`,
-    reason: chalk`Filenames at the root of the extension directory starting with {green "_"} are reserved for use by the browser.`,
-    solutions: [
-      chalk`Rename this file to remove the underscore (e.g., {bold.white.dim '${file}'} to {bold.white.dim '${file.slice(
-        1,
-      )}'}).`,
-      chalk`Move this file to a subdirectory. If necessary, add it manually to the build.`,
-    ],
-    context: chalk`This file was included in the build automatically by our script, which adds all HTML files at the root of {dim '${dir}'}.`,
+    message,
+    reason,
+    solutions,
+    context,
   });
 }
 
 export type DetailedErrorMessage = {
-  problem: string;
+  message: string;
   reason: string;
   solutions: string[];
   context?: string;
 };
 
 export class DetailedError extends Error {
-  constructor({ problem, reason, solutions, context }: DetailedErrorMessage) {
-    const message = `${chalk.red(problem)}
-${chalk.red('Reason:')} ${chalk.white(reason)}
+  constructor({ message, reason, solutions, context }: DetailedErrorMessage) {
+    const redMessage = `${message}
+Reason: ${reason}
 
-${chalk.white.bold(`Suggested Action${solutions.length === 1 ? '' : 's'}:`)}
-${solutions
-  .map((solution) => chalk`{hex('f6851b') •} {white ${solution}}`)
-  .join('\n')}
-${
-  context
-    ? chalk`\n{white.dim.bold Context:} {white.dim ${context}}`
-    : ``
-}
+Suggested Action${solutions.length === 1 ? '' : 's'}:
+${solutions.map((solution) => ` •  ${solution}`).join('\n')}
+${context ? `\n ${context}` : ``}
 `;
-    super(message);
-    this.message = message;
+    super(redMessage);
+    this.message = redMessage;
     this.name = '';
   }
 }
 
 /**
- * Retrieves the datetime of the last commit in UTC for the current Git branch.
+ * Retrieves the timestamp of the last commit in UTC for the current Git branch.
  *
  * The author timestamp is used for its consistency across different
  * repositories and its inclusion in the Git commit hash calculation. This makes
@@ -289,14 +294,11 @@ ${
  * @throws Throws an error if the current branch is detached or has no commits.
  * May also throw if the Git repository is malformed (or not found).
  */
-export function getLastCommitDateTimeUtc(
-  gitDir = join(__dirname, '..', '.git'),
-): number {
-  // Note: this function is synchronous because it needs to be used in a
-  // synchronous context (it's also faster this way)
+export function getLastCommitTimestamp(gitDir = join(__dirname, '..', '.git')) {
+  // Note: this function is synchronous because it's faster this way
 
   // use `unzipSync` from zlib since git uses zlib-wrapped DEFLATE
-  // loaded in this way to avoid requiring it when the function isn't used.
+  // loaded in this way to avoid requiring it when this function isn't used.
   const { unzipSync } = require('node:zlib') as typeof zlib;
 
   // read .git/HEAD to get the current branch/commit
@@ -317,20 +319,19 @@ export function getLastCommitDateTimeUtc(
   // the commit object is a text file with a header and a body, we just want the
   // body, which is after the first null byte
   const firstNull = decompressed.indexOf(0);
-  const commitBuffer = decompressed.subarray(firstNull + 1);
-  const commitText = new TextDecoder().decode(commitBuffer);
-  // git commits are strictly formatted, so we can use a regex to extract the
-  // authorship time fields
-  const [, timestamp, timezoneOffset] = commitText.match(
-    /^author .* <.*> (.*) (.*)$/mu,
-  )!;
+  const commit = new TextDecoder().decode(decompressed.subarray(firstNull + 1));
+  // commits are strictly formatted; use regex to extract the time fields
+  const [, timestamp, offset] = commit.match(/^author .* <.*> (.*) (.*)$/mu)!;
   // convert git timestamp from seconds to milliseconds
   const msSinceLocalEpoch = parseInt(timestamp, 10) * 1000;
-  const msTimezoneOffset = parseInt(timezoneOffset, 10) * 60000;
+  const msTimezoneOffset = parseInt(offset, 10) * 60000;
 
   return msSinceLocalEpoch - msTimezoneOffset;
 }
 
+/**
+ * It gets minimizers for the webpack build.
+ */
 export function getMinimizers() {
   const TerserPlugin: typeof TerserPluginType = require('terser-webpack-plugin');
   return [
@@ -343,50 +344,59 @@ export function getMinimizers() {
   ];
 }
 
-const colors = isatty(process.stderr.fd) ? process.stderr.getColorDepth() : 1;
-export const { toGreen, toOrange } = (() => {
-  const colorize = (code: string, str: string) => `\x1b[${code}m${str}\x1b[0m`;
-  const echo = (str: string) => str;
-  // 24: metamask orange, 8: close to metamask orange, 4: yellow :-(
-  const mm = { 24: '1;38;2;255;92;22', 8: '1;38;5;208', 4: '1;33' };
+/**
+ * Helpers for logging to the console with color.
+ */
+export const { colors, toGreen, toOrange, toPurple } = ((depth, esc) => {
+  if (depth === 1) {
+    const echo = (message: string): string => message;
+    return { colors: false, toGreen: echo, toOrange: echo, toPurple: echo };
+  }
+  // 24: metamask green, 8: close to metamask green, 4: green
+  const green = { 24: '38;2;186;242;74', 8: '38;5;191', 4: '33' }[depth];
+  // 24: metamask orange, 8: close to metamask orange, 4: red :-(
+  const orange = { 24: '38;2;247;85;25', 8: '38;5;208', 4: '31' }[depth];
+  // 24: metamask purple, 8: close to metamask purple, 4: purple
+  const purple = { 24: '38;2;208;117;255', 8: '38;5;177', 4: '35' }[depth];
   return {
-    toGreen: colors > 1 ? colorize.bind(null, '1;32') : echo,
-    toOrange: colors > 1 ? colorize.bind(null, mm[colors as 24 | 8 | 4]) : echo,
+    colors: { green: `${esc}[1;${green}m`, orange: `${esc}[1;${orange}m` },
+    toGreen: (message: string) => `${esc}[1;${green}m${message}${esc}[0m`,
+    toOrange: (message: string) => `${esc}[1;${orange}m${message}${esc}[0m`,
+    toPurple: (message: string) => `${esc}[1;${purple}m${message}${esc}[0m`,
   };
-})();
+})((process.stderr.getColorDepth?.() as 1 | 4 | 8 | 24) || 1, '\u001b');
 
 /**
- * Logs a summary of build information to `stderr`.
+ * Logs a summary of build information to `process.stderr`.
  *
- * @param logStats - If `true`, logs the full stats object to `stderr`,
- * otherwise logs only errors and a completion message, if it completed.
- * @param err
- * @param stats
+ * @param config - If config.stats is `normal`, logs the full stats object to
+ * `stderr`, otherwise logs only errors and a completion message, if it
+ * completed.
+ * @param err - If not `undefined`, logs the error to `process.stderr`.
+ * @param stats - If not `undefined`, logs the stats to `process.stderr`.
  */
-export function logSummary(
-  logStats: boolean,
-  err: Error | null | undefined,
-  stats: Stats | undefined,
-) {
+export function logStats(config: Configuration, err?: Error, stats?: Stats) {
   err && console.error(err);
 
-  if (stats) {
-    stats.compilation.name = toOrange(`🦊 ${stats.compilation.compiler.name}`);
-    if (logStats) {
-      // log everything (computing stats is slow, so we only do it if asked).
-      console.error(stats.toString({ colors }));
-    } else if (stats.hasErrors() || stats.hasWarnings()) {
-      // always log errors and warnings, if we have them.
-      const message = stats.toString({ colors, preset: 'errors-warnings' });
-      console.error(message);
-    } else {
-      // otherwise, just log a simple update
-      console.error(
-        `${stats.compilation.name} (webpack ${version}) compiled ${toGreen(
-          'successfully',
-        )} in ${stats.endTime - stats.startTime}ms`,
-      );
-    }
+  if (!stats) {
+    return;
+  }
+
+  // orange for production builds, purple for development
+  const colorFn = config.mode === 'production' ? toOrange : toPurple;
+  stats.compilation.name = colorFn(`🦊 ${stats.compilation.compiler.name}`);
+  if (config.stats === 'normal') {
+    // log everything (computing stats is slow, so we only do it if asked).
+    console.error(stats.toString({ colors }));
+  } else if (stats.hasErrors() || stats.hasWarnings()) {
+    // always log errors and warnings, if we have them.
+    console.error(stats.toString({ colors, preset: 'errors-warnings' }));
+  } else {
+    // otherwise, just log a simple update
+    const { name } = stats.compilation;
+    const status = toGreen('successfully');
+    const time = `${stats.endTime - stats.startTime} ms`;
+    console.error(`${name} (webpack ${version}) compiled ${status} in ${time}`);
   }
 }
 

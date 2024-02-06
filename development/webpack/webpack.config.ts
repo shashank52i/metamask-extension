@@ -1,6 +1,5 @@
 /**
  * @file The main webpack configuration file for the browser extension.
- * @author David Murdoch <david.murdoch@consensys.net>
  */
 
 import { readFileSync } from 'node:fs';
@@ -25,8 +24,8 @@ import {
   type Manifest,
   generateManifest,
   mergeEnv,
-  combineEntriesFromManifestAndDir,
-  getLastCommitDateTimeUtc,
+  collectEntries,
+  getLastCommitTimestamp,
   getMinimizers,
   NODE_MODULES_RE,
   __HMR_READY__,
@@ -76,7 +75,7 @@ const isDevelopment = args.env === 'development';
 const MANIFEST_VERSION = args.manifest_version;
 const manifestPath = join(dir, `manifest/v${MANIFEST_VERSION}/_base.json`);
 const manifest: Manifest = JSON.parse(readFileSync(manifestPath).toString());
-const { entry, canBeChunked } = combineEntriesFromManifestAndDir(manifest, dir);
+const { entry, canBeChunked } = collectEntries(manifest, dir);
 
 // removes fenced code blocks from the source
 const codeFenceLoader: RuleSetRule & {
@@ -150,7 +149,7 @@ const NAME = 'MetaMask';
 const DESCRIPTION = `MetaMask ${BROWSER} Extension`;
 // TODO: figure out what build.yml's env vars are doing and then do the merge
 // stuff. Also, fix all this crappy ENV code.
-const ENV = mergeEnv({ ENABLE_SENTRY: args.sentry ? "true" : undefined });
+const ENV = mergeEnv({ ENABLE_SENTRY: args.sentry ? 'true' : undefined });
 const envsStringified = Object.entries(ENV).reduce(
   (acc: Record<string, string>, [key, val]) => {
     acc[`${key}`] = JSON.stringify(val);
@@ -316,9 +315,9 @@ if (args.zip) {
   const { ZipPlugin } = require('./utils/plugins/ZipPlugin');
   const options = {
     outFilePath: '../../../builds/metamask.zip',
-    mtime: getLastCommitDateTimeUtc(),
+    mtime: getLastCommitTimestamp(),
     excludeExtensions: ['.map'],
-    // `level: 9` is the highest; it may increase build time by ~5% over
+    // `level: 9` is the highest; it may increase build time by ~5% over level 1
     level: 9,
   };
   plugins.push(new ZipPlugin(options));

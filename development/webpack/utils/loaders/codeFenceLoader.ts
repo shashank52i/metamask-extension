@@ -29,25 +29,14 @@ const schema: JSONSchema7 = {
   additionalProperties: false,
 };
 
-const configuration = {
-  name: codeFenceLoader.name,
-};
+export type CodeFenceLoaderOptions = { features: FeatureLabels };
 
-export type CodeFenceLoaderOptions = {
-  features: FeatureLabels;
-};
-
-type CodeFenceLoader = LoaderContext<CodeFenceLoaderOptions>;
-export default function codeFenceLoader(
-  this: CodeFenceLoader,
-  source: string,
-  inputSourceMap: string,
-) {
+type Context = LoaderContext<CodeFenceLoaderOptions>;
+function codeFenceLoader(this: Context, content: string, map: string) {
   const options = this.getOptions();
-  validate(schema, options, configuration);
-  this.callback(
-    null,
-    removeFencedCode(this.resourcePath, source, options.features)[0],
-    inputSourceMap,
-  );
+  validate(schema, options, { name: 'codeFenceLoader' });
+  const result = removeFencedCode(this.resourcePath, content, options.features);
+  this.callback(null, result[0], map);
 }
+
+export default codeFenceLoader;

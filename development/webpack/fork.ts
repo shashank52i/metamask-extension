@@ -7,7 +7,6 @@
  * the parent process or falls back to sending a POSIX signal (`SIGUSR2`) to
  * signal completion.
  * @see {@link ./launch.ts}
- * @author David Murdoch <david.murdoch@consensys.net>
  */
 
 const PPID = Number(process.env.PPID);

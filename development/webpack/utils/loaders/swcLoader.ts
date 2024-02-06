@@ -134,39 +134,26 @@ const schema = {
   additionalProperties: false,
 } as const satisfies JSONSchema7;
 
-export type SwcLoaderOptions = FromSchema<
-  typeof schema,
-  { keepDefaultedPropertiesOptional: true }
->;
+type SchemaOptions = { keepDefaultedPropertiesOptional: true };
+export type SwcLoaderOptions = FromSchema<typeof schema, SchemaOptions>;
 
-const configuration = {
-  name: swcLoader.name,
-};
+type Context = LoaderContext<SwcLoaderOptions>;
+export default function swcLoader(this: Context, content: string, map: string) {
+  const pluginOptions = this.getOptions();
+  validate(schema, pluginOptions, { name: 'swcLoader' });
 
-export default function swcLoader(
-  this: LoaderContext<SwcLoaderOptions>,
-  source: string,
-  inputSourceMap: string,
-) {
-  const options = this.getOptions();
-  validate(schema, options, configuration);
-
-  const filename = this.resourcePath;
-  const swcOptions = {
-    ...options,
+  const options = {
+    ...pluginOptions,
     envName: this.mode,
-    filename,
-    inputSourceMap,
+    filename: this.resourcePath,
+    inputSourceMap: map,
+    sourceFileName: this.resourcePath,
     sourceMaps: this.sourceMap,
-    sourceFileName: filename,
     swcrc: false,
     // TODO: remove this `as Options` cast when swc's `Options` type is fixed
     // see: https://github.com/swc-project/swc/issues/8494
   } as Options;
 
-  const callback = this.async();
-  transform(source, swcOptions).then(
-    ({ code, map }) => callback(null, code, map),
-    callback,
-  );
+  const cb = this.async();
+  transform(content, options).then(({ code, map }) => cb(null, code, map), cb);
 }

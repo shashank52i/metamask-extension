@@ -10,8 +10,6 @@
  * On Linux-like systems you can skip the overhead of running `yarn` by
  * executing this file directly, e.g., `./development/webpack/launch.ts`, or via
  * bun or tsx.
- *
- * @author David Murdoch <david.murdoch@consensys.net>
  */
 
 // Note: minimize non-`type` imports to decrease load time.

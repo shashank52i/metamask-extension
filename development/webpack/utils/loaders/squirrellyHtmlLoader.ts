@@ -12,15 +12,9 @@ const schema = {
 
 export type SquirrellyHtmlLoaderOptions = FromSchema<typeof schema>;
 
-const configuration = {
-  name: squirrellyHtmlLoader.name,
-};
-
-export default function squirrellyHtmlLoader(
-  this: LoaderContext<SquirrellyHtmlLoaderOptions>,
-  source: string,
-) {
+type Context = LoaderContext<SquirrellyHtmlLoaderOptions>;
+export default function squirrellyHtmlLoader(this: Context, content: string) {
   const options = this.getOptions();
-  validate(schema, options, configuration);
-  return render(source, options);
+  validate(schema, options, { name: 'squirrellyHtmlLoader' });
+  return render(content, options);
 }

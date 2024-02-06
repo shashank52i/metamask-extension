@@ -1,13 +1,19 @@
 import webpack from 'webpack';
 import type WebpackDevServerType from 'webpack-dev-server';
-import { noop, logSummary, __HMR_READY__ } from './utils/helpers';
+import { noop, logStats, __HMR_READY__ } from './utils/helpers';
 import config from './webpack.config.js';
 
 // disable browserslist stats as it needlessly traverses the filesystem multiple
 // times looking for a stats file that doesn't exist.
 require('browserslist/node.js').getStat = noop;
 
-export function build(onBuild: () => void = noop) {
+/**
+ * Builds the extension
+ *
+ * @returns a Promise that resolves when the build is complete, but before
+ * caching has been persisted. In watch mode, the Promise never resolves.
+ */
+export function build(onComplete: () => void = noop) {
   const isDevelopment = config.mode === 'development';
 
   if (__HMR_READY__ && config.watch) {
@@ -39,13 +45,15 @@ export function build(onBuild: () => void = noop) {
     if (config.watch) {
       // once HMR is ready (__HMR_READY__ variable), this section should be removed.
       compiler.watch(config.watchOptions, (err, stats) => {
-        logSummary(config.stats !== 'none', err, stats);
+        logStats(config, err ?? undefined, stats);
         console.error('🦊 Watching for changes…');
       });
     } else {
       compiler.run((err, stats) => {
-        logSummary(config.stats !== 'none', err, stats);
-        onBuild();
+        logStats(config, err ?? undefined, stats);
+        // `onComplete` must be called synchronously _before_ `compiler.close`
+        // or the caller might observe output from the `close` command.
+        onComplete();
         compiler.close(noop);
       });
     }
