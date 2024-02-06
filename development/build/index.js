@@ -42,7 +42,7 @@ require('@babel/core');
 // our lint rules and think they are an enormous waste of engineering resources.
 // ESLint-related
 require('@babel/eslint-parser');
-// require('@babel/eslint-plugin');
+require('@babel/eslint-plugin');
 // require('@metamask/eslint-config');
 // require('@metamask/eslint-config-nodejs');
 // require('@typescript-eslint/parser');

@@ -289,6 +289,12 @@
         "process": true
       }
     },
+    "@babel/eslint-plugin": {
+      "packages": {
+        "@babel/eslint-plugin>eslint-rule-composer": true,
+        "eslint": true
+      }
+    },
     "@babel/plugin-transform-logical-assignment-operators": {
       "packages": {
         "@babel/core": true,
