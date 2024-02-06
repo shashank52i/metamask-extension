@@ -40,8 +40,8 @@ require('@babel/core');
 // already wasted half a day on these rules. I'm disabling them because its
 // really dumb to let linting hold back updating typescript. I really hate
 // our lint rules and think they are an enormous waste of engineering resources.
-// // ESLint-related
-// require('@babel/eslint-parser');
+// ESLint-related
+require('@babel/eslint-parser');
 // require('@babel/eslint-plugin');
 // require('@metamask/eslint-config');
 // require('@metamask/eslint-config-nodejs');

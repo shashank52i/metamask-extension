@@ -256,14 +256,19 @@
     },
     "@babel/eslint-parser": {
       "builtin": {
-        "path": true
+        "module": true,
+        "path": true,
+        "worker_threads": true
       },
       "globals": {
+        "__dirname": true,
+        "process.cwd": true,
         "process.versions": true
       },
       "packages": {
         "@babel/core": true,
         "@babel/core>@babel/parser": true,
+        "@babel/eslint-parser>@nicolo-ribaudo/eslint-scope-5-internals": true,
         "@babel/eslint-parser>eslint-scope": true,
         "@babel/eslint-parser>eslint-visitor-keys": true,
         "@babel/eslint-parser>semver": true,
@@ -271,6 +276,17 @@
         "depcheck>@babel/parser": true,
         "eslint": true,
         "lavamoat>lavamoat-tofu>@babel/parser": true
+      }
+    },
+    "@babel/eslint-parser>@nicolo-ribaudo/eslint-scope-5-internals": {
+      "packages": {
+        "webpack>eslint-scope": true
+      }
+    },
+    "@babel/eslint-parser>semver": {
+      "globals": {
+        "console": true,
+        "process": true
       }
     },
     "@babel/plugin-transform-logical-assignment-operators": {
@@ -7426,6 +7442,15 @@
         "autoprefixer>caniuse-lite": true,
         "webpack>browserslist>electron-to-chromium": true,
         "webpack>browserslist>node-releases": true
+      }
+    },
+    "webpack>eslint-scope": {
+      "builtin": {
+        "assert": true
+      },
+      "packages": {
+        "eslint>eslint-scope>esrecurse": true,
+        "webpack>eslint-scope>estraverse": true
       }
     },
     "webpack>json-parse-even-better-errors": {
