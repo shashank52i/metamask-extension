@@ -6,11 +6,10 @@ const watch = require('gulp-watch');
 const sourcemaps = require('gulp-sourcemaps');
 const rtlcss = require('postcss-rtlcss');
 const postcss = require('gulp-postcss');
-const sass = require('gulp-sass')(require("./sass-compiler"));
+const sass = require('gulp-sass')(require('./sass-compiler'));
 const pump = pify(require('pump'));
 const { TASKS } = require('./constants');
 const { createTask } = require('./task');
-
 
 // scss compilation and autoprefixing tasks
 module.exports = createStyleTasks;
@@ -75,13 +74,10 @@ async function buildScssPipeline(src, dest, devMode) {
         includePaths: [
           // enables shortcuts to `@use design-system`, `@use utilities`, etc.
           './ui/css',
-          './node_modules'
-        ]
+          './node_modules',
+        ],
       }),
-      postcss([
-        autoprefixer(),
-        rtlcss()
-      ]),
+      postcss([autoprefixer(), rtlcss()]),
       devMode && sourcemaps.write(),
       gulp.dest(dest),
     ].filter(Boolean),
