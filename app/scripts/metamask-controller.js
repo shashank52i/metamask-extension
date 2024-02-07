@@ -534,6 +534,19 @@ export default class MetamaskController extends EventEmitter {
       networkConfigurations: this.networkController.state.networkConfigurations,
     });
 
+    // couples the useRequestQueue featureflag with the perDomainNetwork feature flag
+    this.selectedNetworkController.setPerDomainNetwork(
+      this.preferencesController.store.getState().useRequestQueue,
+    );
+    this.preferencesController.store.subscribe(({ useRequestQueue }) => {
+      if (
+        useRequestQueue !==
+        this.selectedNetworkController.state.perDomainNetwork
+      ) {
+        this.selectedNetworkController.setPerDomainNetwork(useRequestQueue);
+      }
+    });
+
     this.assetsContractController = new AssetsContractController(
       {
         chainId: this.networkController.state.providerConfig.chainId,
@@ -2401,6 +2414,11 @@ export default class MetamaskController extends EventEmitter {
 
         for (const [origin, accounts] of changedAccounts.entries()) {
           this._notifyAccountsChange(origin, accounts);
+          // TODO add selectedNetworkController default values here
+          this.setNetworkClientIdForDomain(
+            origin,
+            this.networkController.state.selectedNetworkClientId,
+          );
         }
       },
       getPermittedAccountsByOrigin,
@@ -4347,9 +4365,6 @@ export default class MetamaskController extends EventEmitter {
 
   setUseRequestQueue(value) {
     this.preferencesController.setUseRequestQueue(value);
-    this.selectedNetworkController.update((state) => {
-      state.perDomainNetwork = value;
-    });
   }
 
   //=============================================================================
@@ -4630,6 +4645,27 @@ export default class MetamaskController extends EventEmitter {
     });
   }
   ///: END:ONLY_INCLUDE_IF
+
+  setNetworkClientIdForDomain(origin, networkClientId) {
+    const hasPermission =
+      this.permissionController.getPermissions(origin) !== undefined;
+    if (
+      this.selectedNetworkController.state.perDomainNetwork &&
+      hasPermission
+    ) {
+      // TODO: this should be handled inside selectedNetworkController
+      const selectedNetworkClientIdForDomain =
+        this.selectedNetworkController.getNetworkClientIdForDomain(origin);
+
+      if (selectedNetworkClientIdForDomain === undefined) {
+        this.selectedNetworkController.setNetworkClientIdForDomain(
+          origin,
+          networkClientId,
+        );
+      }
+      // end of things that belong in selectedNetworkController
+    }
+  }
 
   /**
    * A method for creating a provider that is safely restricted for the requesting subject.
