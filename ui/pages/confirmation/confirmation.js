@@ -14,6 +14,7 @@ import log from 'loglevel';
 
 ///: BEGIN:ONLY_INCLUDE_IF(snaps)
 import { ApprovalType } from '@metamask/controller-utils';
+import { SnapUIRenderer } from '../../components/app/snaps/snap-ui-renderer';
 ///: END:ONLY_INCLUDE_IF
 import fetchWithCache from '../../../shared/lib/fetch-with-cache';
 import Box from '../../components/ui/box';
@@ -44,7 +45,6 @@ import { getSnapName } from '../../helpers/utils/util';
 import { SNAP_MANAGE_ACCOUNTS_CONFIRMATION_TYPES } from '../../../shared/constants/app';
 ///: END:ONLY_INCLUDE_IF
 import { DAY } from '../../../shared/constants/time';
-import { SnapUIRenderer } from '../../components/app/snaps/snap-ui-renderer';
 import ConfirmationFooter from './components/confirmation-footer';
 import {
   getTemplateValues,
