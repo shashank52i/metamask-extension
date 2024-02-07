@@ -4786,7 +4786,7 @@ export function updateInterfaceState(
 ): ThunkAction<void, MetaMaskReduxState, unknown, AnyAction> {
   return (async (dispatch: MetaMaskReduxDispatch) => {
     await submitRequestToBackground<void>('updateInterfaceState', [id, state]);
-    forceUpdateMetamaskState(dispatch);
+    await forceUpdateMetamaskState(dispatch);
   }) as any;
 }
 
@@ -4801,7 +4801,7 @@ export function deleteInterface(
 ): ThunkAction<void, MetaMaskReduxState, unknown, AnyAction> {
   return (async (dispatch: MetaMaskReduxDispatch) => {
     await submitRequestToBackground<void>('deleteInterface', [id]);
-    forceUpdateMetamaskState(dispatch);
+    await forceUpdateMetamaskState(dispatch);
   }) as any;
 }
 ///: END:ONLY_INCLUDE_IF
