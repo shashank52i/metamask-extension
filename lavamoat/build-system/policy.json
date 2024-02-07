@@ -1422,59 +1422,6 @@
         "webpack>eslint-scope": true
       }
     },
-    "@typescript-eslint/eslint-plugin>tsutils": {
-      "packages": {
-        "@typescript-eslint/eslint-plugin>tsutils>tslib": true,
-        "typescript": true
-      }
-    },
-    "@typescript-eslint/eslint-plugin>tsutils>tslib": {
-      "globals": {
-        "define": true
-      }
-    },
-    "@typescript-eslint/parser": {
-      "packages": {
-        "@typescript-eslint/parser>@typescript-eslint/scope-manager": true,
-        "@typescript-eslint/parser>@typescript-eslint/typescript-estree": true,
-        "nock>debug": true,
-        "typescript": true
-      }
-    },
-    "@typescript-eslint/parser>@typescript-eslint/scope-manager": {
-      "packages": {
-        "@typescript-eslint/parser>@typescript-eslint/scope-manager>@typescript-eslint/visitor-keys": true,
-        "@typescript-eslint/parser>@typescript-eslint/types": true
-      }
-    },
-    "@typescript-eslint/parser>@typescript-eslint/scope-manager>@typescript-eslint/visitor-keys": {
-      "packages": {
-        "eslint>eslint-visitor-keys": true
-      }
-    },
-    "@typescript-eslint/parser>@typescript-eslint/typescript-estree": {
-      "builtin": {
-        "fs": true,
-        "path": true
-      },
-      "globals": {
-        "console.log": true,
-        "console.warn": true,
-        "new": true,
-        "process": true,
-        "target": true
-      },
-      "packages": {
-        "@typescript-eslint/eslint-plugin>tsutils": true,
-        "@typescript-eslint/parser>@typescript-eslint/scope-manager>@typescript-eslint/visitor-keys": true,
-        "@typescript-eslint/parser>@typescript-eslint/types": true,
-        "del>is-glob": true,
-        "globby": true,
-        "nock>debug": true,
-        "semver": true,
-        "typescript": true
-      }
-    },
     "autoprefixer": {
       "globals": {
         "console": true,
@@ -7166,22 +7113,6 @@
         "define": true
       }
     },
-    "terser>source-map-support": {
-      "builtin": {
-        "fs": true,
-        "path.dirname": true,
-        "path.resolve": true
-      },
-      "globals": {
-        "XMLHttpRequest": true,
-        "console.error": true,
-        "process": true
-      },
-      "packages": {
-        "terser>source-map-support>buffer-from": true,
-        "terser>source-map-support>source-map": true
-      }
-    },
     "terser>source-map-support>buffer-from": {
       "globals": {
         "Buffer": true
@@ -7347,36 +7278,8 @@
       }
     },
     "typescript": {
-      "builtin": {
-        "buffer.Buffer": true,
-        "crypto": true,
-        "fs": true,
-        "inspector": true,
-        "module.findPnpApi": true,
-        "os.EOL": true,
-        "os.platform": true,
-        "path.dirname": true,
-        "path.join": true,
-        "path.resolve": true,
-        "perf_hooks.PerformanceObserver": true,
-        "perf_hooks.performance": true
-      },
       "globals": {
-        "Intl.Collator": true,
-        "PerformanceObserver": true,
-        "__dirname": true,
-        "__filename": true,
-        "clearTimeout": true,
-        "console": true,
-        "gc": true,
-        "globalThis": true,
-        "onProfilerEvent": true,
-        "performance": true,
-        "process": true,
-        "setTimeout": true
-      },
-      "packages": {
-        "terser>source-map-support": true
+        "globalThis": true
       }
     },
     "vinyl": {
