@@ -4927,7 +4927,7 @@ export default class MetamaskController extends EventEmitter {
             'SnapInterfaceController:getInterface',
             origin,
             ...args,
-          ),
+          ).state,
         updateInterface: this.controllerMessenger.call.bind(
           this.controllerMessenger,
           'SnapInterfaceController:updateInterface',
