@@ -1165,13 +1165,13 @@ jobs:
       - slack/notify:
           branch_pattern: Version-v*
           event: fail
-          mentions: <@antonio.regadas>, @ramon.acitores134
+          mentions: <@antonio.regadas>
           template: basic_fail_1
           channel: C01LUJL3T98
       - slack/notify:
           branch_pattern: develop
           event: fail
-          mentions: <@antonio.regadas>, @ramon.acitores134
+          mentions: <@antonio.regadas>
           template: basic_fail_1
           channel: C05QXJA7NP8
       - store_artifacts:
