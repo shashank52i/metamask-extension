@@ -4499,6 +4499,25 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@metamask/permission-controller@npm:^8.0.0":
+  version: 8.0.0
+  resolution: "@metamask/permission-controller@npm:8.0.0"
+  dependencies:
+    "@metamask/base-controller": "npm:^4.1.1"
+    "@metamask/controller-utils": "npm:^8.0.2"
+    "@metamask/json-rpc-engine": "npm:^7.3.2"
+    "@metamask/rpc-errors": "npm:^6.1.0"
+    "@metamask/utils": "npm:^8.3.0"
+    "@types/deep-freeze-strict": "npm:^1.1.0"
+    deep-freeze-strict: "npm:^1.1.1"
+    immer: "npm:^9.0.6"
+    nanoid: "npm:^3.1.31"
+  peerDependencies:
+    "@metamask/approval-controller": ^5.1.2
+  checksum: cbd418473fc90c210c5d1a50278be2adb62737ad027bd68433651e4de290d178f53e7018c60ac749227f6951c6cab8fef54073b375a5391461a4ae63a9b67706
+  languageName: node
+  linkType: hard
+
 "@metamask/phishing-controller@npm:^8.0.0, @metamask/phishing-controller@npm:^8.0.1":
   version: 8.0.1
   resolution: "@metamask/phishing-controller@npm:8.0.1"
@@ -4681,18 +4700,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@metamask/selected-network-controller@npm:^6.0.0":
-  version: 6.0.0
-  resolution: "@metamask/selected-network-controller@npm:6.0.0"
+"@metamask/selected-network-controller@npm:@metamask-previews/selected-network-controller@7.0.1-preview.08978bf":
+  version: 7.0.1-preview.08978bf
+  resolution: "@metamask-previews/selected-network-controller@npm:7.0.1-preview.08978bf"
   dependencies:
-    "@metamask/base-controller": "npm:^4.0.1"
-    "@metamask/json-rpc-engine": "npm:^7.3.1"
-    "@metamask/network-controller": "npm:^17.1.0"
-    "@metamask/swappable-obj-proxy": "npm:^2.1.0"
-    "@metamask/utils": "npm:^8.2.0"
+    "@metamask/base-controller": "npm:^4.1.1"
+    "@metamask/json-rpc-engine": "npm:^7.3.2"
+    "@metamask/network-controller": "npm:^17.2.0"
+    "@metamask/permission-controller": "npm:^8.0.0"
+    "@metamask/swappable-obj-proxy": "npm:^2.2.0"
+    "@metamask/utils": "npm:^8.3.0"
   peerDependencies:
-    "@metamask/network-controller": ^17.1.0
-  checksum: 06108b93af648cbb8bed337459e579f1a314cd0d1d8405e4a9501a5933c961664170bdb9022dbbbb08066b577869b07b6f00f84a3076b3ae8fdc2fc8c4ea4c9c
+    "@metamask/network-controller": ^17.2.0
+  checksum: 5128f8e9feb2c9383ad0c1be5fc4b54fe9e5979d7ded3b21822edab58eba008931da30f554e15f3893babd6f4d9a887f6e867f7db664e37dd42d707dcbf16208
   languageName: node
   linkType: hard
 
@@ -24038,7 +24058,7 @@ __metadata:
     "@metamask/message-manager": "npm:^7.3.0"
     "@metamask/metamask-eth-abis": "npm:^3.0.0"
     "@metamask/name-controller": "npm:^4.2.0"
-    "@metamask/network-controller": "npm:^17.1.0"
+    "@metamask/network-controller": "npm:^17.2.0"
     "@metamask/notification-controller": "npm:^3.0.0"
     "@metamask/obs-store": "npm:^8.1.0"
     "@metamask/permission-controller": "npm:^7.1.0"

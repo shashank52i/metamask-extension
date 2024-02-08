@@ -490,22 +490,27 @@ export default class MetamaskController extends EventEmitter {
     this.selectedNetworkController = new SelectedNetworkController({
       messenger: this.controllerMessenger.getRestricted({
         name: 'SelectedNetworkController',
-        allowedActions: ['NetworkController:getNetworkClientById'],
+        allowedActions: [
+          'NetworkController:getNetworkClientById',
+          'NetworkController:getState',
+          `PermissionController:hasPermissions`,
+        ],
         allowedEvents: ['NetworkController:stateChange'],
       }),
     });
 
     // If the selected network client for the metamask domain is not set, set it to the current network client
-    if (
-      !this.selectedNetworkController.getNetworkClientIdForDomain('metamask')
-    ) {
-      this.selectedNetworkController.setNetworkClientIdForMetamask(
-        this.networkController.state.selectedNetworkClientId,
-      );
-    }
+    // TODO add this to the selected network controller itself
+    // if (
+    //   !this.selectedNetworkController.getNetworkClientIdForDomain('metamask')
+    // ) {
+    //   this.selectedNetworkController.setNetworkClientIdForMetamask(
+    //     this.networkController.state.selectedNetworkClientId,
+    //   );
+    // }
 
     // If the perDomainNetwork feature flag is enabled, use metamask origin provider and block tracker
-    // as the proxy passed to the controllers instantiated below
+    // as the proxy passed to the controllers instantiated below, otherwise use the network controller's provider and block tracker
     let networkClient;
     if (this.selectedNetworkController.state.perDomainNetwork) {
       networkClient =
@@ -2414,11 +2419,10 @@ export default class MetamaskController extends EventEmitter {
 
         for (const [origin, accounts] of changedAccounts.entries()) {
           this._notifyAccountsChange(origin, accounts);
-          // TODO add selectedNetworkController default values here
-          this.setNetworkClientIdForDomain(
-            origin,
-            this.networkController.state.selectedNetworkClientId,
-          );
+          // When permissions are added for a given origin we need to
+          // set the network client id for that origin to the current
+          // globally selected network client id.
+          this.setNetworkClientIdForDomain(origin);
         }
       },
       getPermittedAccountsByOrigin,
@@ -2576,7 +2580,7 @@ export default class MetamaskController extends EventEmitter {
    */
   getProviderNetworkState(origin = 'metamask') {
     let chainId;
-    if (this.preferencesController.getUseRequestQueue()) {
+    if (this.preferencesController?.getUseRequestQueue()) {
       // It would be nice to have selectedNetworkController always return a value, and have it decide how to default the values (in all cases we want the default to be 'what ever the globally selected network is').
       // I ended up adding this defaulting here because of an issue where the selected network for the origin 'metamask' - it is `undefined` until you unlock the wallet and select a network for the first time.
       const networkClientId =
@@ -4646,7 +4650,12 @@ export default class MetamaskController extends EventEmitter {
   }
   ///: END:ONLY_INCLUDE_IF
 
-  setNetworkClientIdForDomain(origin, networkClientId) {
+  setNetworkClientIdForDomain(
+    origin,
+    networkClientId = this.selectedNetworkController.getNetworkClientIdForDomain(
+      'metamask',
+    ),
+  ) {
     const hasPermission =
       this.permissionController.getPermissions(origin) !== undefined;
     if (
@@ -4654,15 +4663,15 @@ export default class MetamaskController extends EventEmitter {
       hasPermission
     ) {
       // TODO: this should be handled inside selectedNetworkController
-      const selectedNetworkClientIdForDomain =
-        this.selectedNetworkController.getNetworkClientIdForDomain(origin);
+      // const selectedNetworkClientIdForDomain =
+      //   this.selectedNetworkController.getNetworkClientIdForDomain(origin);
 
-      if (selectedNetworkClientIdForDomain === undefined) {
-        this.selectedNetworkController.setNetworkClientIdForDomain(
-          origin,
-          networkClientId,
-        );
-      }
+      // if (selectedNetworkClientIdForDomain === undefined) {
+      this.selectedNetworkController.setNetworkClientIdForDomain(
+        origin,
+        networkClientId,
+      );
+      // }
       // end of things that belong in selectedNetworkController
     }
   }
@@ -4703,15 +4712,12 @@ export default class MetamaskController extends EventEmitter {
       hasPermission
     ) {
       // TODO: this should be handled inside selectedNetworkController
-      const selectedNetworkClientIdForDomain =
-        this.selectedNetworkController.getNetworkClientIdForDomain(origin);
+      // const selectedNetworkClientIdForDomain =
+      //   this.selectedNetworkController.getNetworkClientIdForDomain(origin);
 
-      if (selectedNetworkClientIdForDomain === undefined) {
-        this.selectedNetworkController.setNetworkClientIdForDomain(
-          origin,
-          this.networkController.state.selectedNetworkClientId,
-        );
-      }
+      // if (selectedNetworkClientIdForDomain === undefined) {
+      this.selectedNetworkController.setNetworkClientIdForDomain(origin);
+      // }
       // end of things that belong in selectedNetworkController
       proxyClient =
         this.selectedNetworkController.getProviderAndBlockTracker(origin);
@@ -5717,7 +5723,7 @@ export default class MetamaskController extends EventEmitter {
   }
 
   _notifyChainChange() {
-    if (this.preferencesController.getUseRequestQueue()) {
+    if (this.preferencesController?.getUseRequestQueue()) {
       this.notifyAllConnections((origin) => ({
         method: NOTIFICATION_NAMES.chainChanged,
         params: this.getProviderNetworkState(origin),
