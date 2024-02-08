@@ -40,7 +40,7 @@ class ChromeDriver {
     } else {
       args.push('--log-level=3');
     }
-    if (process.env.SELENIUM_HEADLESS) {
+    if (1 || process.env.SELENIUM_HEADLESS) {
       args.push('--headless=new');
     }
     const options = new chrome.Options().addArguments(args);
@@ -49,7 +49,7 @@ class ChromeDriver {
       'download.default_directory': `${process.cwd()}/test-artifacts/downloads`,
     });
     // Allow disabling DoT local testing
-    if (process.env.SELENIUM_DISABLE_DOT) {
+    if (1 || process.env.SELENIUM_DISABLE_DOT) {
       options.setLocalState({
         'dns_over_https.mode': 'off',
         'dns_over_https.templates': '',

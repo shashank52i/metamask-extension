@@ -58,7 +58,7 @@ class FirefoxDriver {
     if (process.env.CI === 'true') {
       options.setBinary('/opt/firefox/firefox');
     }
-    if (process.env.SELENIUM_HEADLESS) {
+    if (1 || process.env.SELENIUM_HEADLESS) {
       options.headless();
     }
     const builder = new Builder()
