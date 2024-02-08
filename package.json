@@ -693,7 +693,8 @@
       "$root$": false,
       "@metamask/eth-trezor-keyring>@trezor/connect-web>@trezor/connect>@trezor/transport>usb": false,
       "@metamask/ethjs-query>babel-runtime>core-js": false,
-      "@storybook/test-runner>@swc/core": false
+      "@storybook/test-runner>@swc/core": false,
+      "@lavamoat/lavadome-react>@lavamoat/preinstall-always-fail": false
     }
   },
   "packageManager": "yarn@4.0.2"
