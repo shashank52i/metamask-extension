@@ -718,18 +718,10 @@ const sendScreenToConfirmScreen = async (
   await openActionMenuAndStartSendFlow(driver);
   await driver.fill('[data-testid="ens-input"]', recipientAddress);
   await driver.fill('.unit-input__input', quantity);
-  if (process.env.MULTICHAIN) {
-    await driver.clickElement({
-      text: 'Continue',
-      tag: 'button',
-    });
-  } else {
-    await driver.clickElement({
-      text: 'Next',
-      tag: 'button',
-      css: '[data-testid="page-container-footer-next"]',
-    });
-  }
+  await driver.clickElement({
+    text: 'Continue',
+    tag: 'button',
+  });
 };
 
 const sendTransaction = async (
