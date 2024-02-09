@@ -58,7 +58,7 @@ export default class ExtensionPlatform {
       // field on Chrome for non-main builds (i.e. Flask, Beta) because we want to show the
       // version in the SemVer-compliant format "v[major].[minor].[patch]-[build-type].[build-number]",
       // yet Chrome does not allow letters in the `version` field.
-      return versionName;
+      return `Metamask 🦊 ${versionName}`;
       // A fourth version part is sometimes present for "rollback" Chrome builds
     } else if (![3, 4].includes(versionParts.length)) {
       throw new Error(`Invalid version: ${version}`);
@@ -70,13 +70,14 @@ export default class ExtensionPlatform {
         throw new Error(`Version contains invalid prerelease: ${version}`);
       }
       const [, patch, buildType, buildVersion] = matches;
-      return `${major}.${minor}.${patch}-${buildType}.${buildVersion}`;
+      return `Metamask 🦊 ${major}.${minor}.${patch}-${buildType}.${buildVersion}`;
     }
 
     // If there is no `version_name` and there are only 3 or 4 version parts, then this is not a
     // prerelease and the version requires no modification.
-    return version;
+    return `Metamask 🦊 ${version}`;
   }
+
 
   getExtensionURL(route = null, queryString = null) {
     let extensionURL = browser.runtime.getURL('home.html');
